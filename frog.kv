@@ -1,0 +1,124 @@
+#:kivy 1.8.0
+#:import randint random.randint
+# import win kivy.core.window
+# import kivy kivy
+# the game background image
+<Background>
+    source: self.source
+    size: app.window.size
+    allow_stretch: True
+    keep_ratio: False
+
+# line to draw jump distance
+<JumpLine>
+    x1: 0
+    y1: 0
+    x2: 0
+    y2: 0
+    max: dp(120)
+    canvas:
+        Color:
+            rgba: 1, 0, 0, .9
+        Line:
+            points: self.x1, self.y1, self.x2, self.y2
+            width: dp(1.5)
+
+# frog description
+<Frog>
+    scatter: scatter
+    source: self.source
+    size: dp(30), dp(40)
+    place: self.place
+    alive: True
+    Scatter:
+        id: scatter
+        do_rotation: False
+        do_translation: False
+        do_scale: False
+        size: root.size
+        pos: root.pos
+        center: root.center
+
+        Image:
+            source: root.source
+            size: root.size
+            center_x: self.center_x
+            center_y: self.center_y
+            allow_stretch: True
+            keep_ratio: False
+            
+# water lily description
+<WaterLily@Image>
+    source: self.source
+    size: dp(60), dp(60)
+    free: True
+    canvas.before:
+        PushMatrix
+        Rotate:
+            axis: 0, 0, 1
+            angle: randint(0, 360)
+            origin: self.center
+    canvas.after:
+        PopMatrix
+
+
+<Start@Image>
+    source: self.source
+    size: dp(200), dp(60)
+    allow_stretch: True
+    keep_ratio: False
+
+<MainWidget>
+    size: app.window.size
+    pos: 0, 0
+    frog: frog
+    background: background
+    start: start
+    jumpline: jumpline
+    lilys: (lily, lily_001)
+    frogs: (frog, frog1)
+    Background:
+        id: background
+        source: "img/background_dark.png"
+
+    Start:
+        id: start
+        center_x: root.center_x
+        y: 0
+        source: "img/start.png"
+        free: False
+    
+    WaterLily:
+        id: lily
+        source: "img/water_lily_001.png"
+        center_x: start.center_x
+        y: start.y + dp(100)
+        free: False
+
+    WaterLily:
+        id: lily_001
+        source: "img/water_lily_001.png"
+        center_x: start.center_x
+        y: start.y + dp(200)
+
+    JumpLine:
+        id: jumpline
+
+    Frog:
+        app: app
+        id: frog
+        angle: 0
+        source: "img/frog.png"
+        place: start
+        center_x: self.place.center_x
+        center_y: self.place.center_y
+
+    Frog:
+        app: app
+        id: frog1
+        angle: 0
+        source: "img/frog.png"
+        place: lily
+        center_x: self.place.center_x
+        center_y: self.place.center_y
+
