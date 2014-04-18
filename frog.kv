@@ -48,25 +48,38 @@
             keep_ratio: False
             
 # water lily description
-<WaterLily@Image>
+<WaterLily>
+    scatter: scatter
     source: self.source
     size: dp(60), dp(60)
     free: True
-    canvas.before:
-        PushMatrix
-        Rotate:
-            axis: 0, 0, 1
-            angle: randint(0, 360)
-            origin: self.center
-    canvas.after:
-        PopMatrix
+    static: False
+    Scatter:
+        id: scatter
+        do_rotation: False
+        do_translation: False
+        do_scale: False
+        rotation: randint(0, 360)
+        size: root.size
+        pos: root.pos
+        center: root.center
+
+        Image:
+            source: root.source
+            size: root.size
+            center_x: self.center_x
+            center_y: self.center_y
+            allow_stretch: True
+            keep_ratio: False
 
 
-<Start@Image>
+<Base@Image>
     source: self.source
     size: dp(200), dp(60)
     allow_stretch: True
     keep_ratio: False
+    free: self.free
+    static: True
 
 <MainWidget>
     size: app.window.size
@@ -74,6 +87,7 @@
     frog: frog
     background: background
     start: start
+    end: end
     jumpline: jumpline
     lilys: (lily, lily_001)
     frogs: (frog, frog1)
@@ -81,25 +95,36 @@
         id: background
         source: "img/background_dark.png"
 
-    Start:
+    Base:
         id: start
         center_x: root.center_x
         y: 0
         source: "img/start.png"
         free: False
+
+    Base:
+        id: end
+        center_x: root.center_x
+        top: root.height
+        source: "img/end.png"
+        free: True
     
     WaterLily:
+        app: app
         id: lily
         source: "img/water_lily_001.png"
         center_x: start.center_x
         y: start.y + dp(100)
         free: False
+        static: False
 
     WaterLily:
+        app: app
         id: lily_001
-        source: "img/water_lily_001.png"
+        source: "img/water_lily_stone.png"
         center_x: start.center_x
         y: start.y + dp(200)
+        static: True
 
     JumpLine:
         id: jumpline

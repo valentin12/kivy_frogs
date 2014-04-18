@@ -3,16 +3,14 @@ kivy.require("1.8.0")
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.image import Image
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.vector import Vector
 from kivy.animation import Animation
 from kivy.metrics import dp
+from kivy.clock import Clock
 
-from kivy.utils import boundary
-from kivy.graphics.transformation import Matrix
-from math import radians
-from math import atan2
 from math import pi
+from math import atan2
 
 
 class FrogApp(App):
@@ -34,6 +32,40 @@ class MainWidget(Widget):
 
 class Background(Image):
     pass
+
+
+class WaterLily(Widget):
+    free = BooleanProperty(True)
+    def __init__(self, **kwargs):
+        super(WaterLily, self).__init__(**kwargs)
+        self.bind(free=self.on_free_changed)
+        # scale down to simulate sinking
+        self.sinking_anim = Animation(scale=.001, duration=2)
+        self.sinking_anim.bind(
+            on_complete=lambda a, b: self.on_sank())
+        # scale up to appear again
+        self.appear_anim = Animation(scale=1, duration=2)
+
+    def on_free_changed(self, instance, value):
+        if not value and not self.static:
+            # wait 7 sec until sinking starts
+            Clock.schedule_once(self.start_sinking, 4)
+
+    def start_sinking(self, dt):
+        if not self.free:
+            self.sinking_anim.start(self.scatter)
+
+    def appear(self, dt):
+        self.appear_anim.start(self.scatter)
+
+    def on_sank(self):
+        # kill all frogs on the lily
+        for frog in self.app.root.frogs:
+            if frog.place == self:
+                frog.kill()
+        # wait five seconds under water, then appear again
+        self.free = True
+        Clock.schedule_once(self.appear, 5)
 
 
 class JumpLine(Widget):
@@ -111,7 +143,12 @@ class Frog(Widget):
             it.append(self.app.root.start)
             die = True
             for lily in it:
-                if lily.collide_point(*end):
+                collide = False
+                try:
+                    collide = lily.scatter.collide_point(*end)
+                except AttributeError:
+                    collide = lily.collide_point(*end)
+                if collide:
                     die = False
                     if lily.free:
                         self.place.free = True
@@ -130,11 +167,17 @@ class Frog(Widget):
         return super(Frog, self).on_touch_down(touch)
 
     def go_die(self, point):
+        print "go die"
         anim = Animation(center_x=point[0],
                          center_y=point[1],
                          duration=.3)
+        anim.bind(on_complete=lambda anim,
+                  widget: self.kill())
+        anim.start(self)
+
+    def kill(self):
         scale_anim = Animation(scale=.001,
-                               duration=2)
+                               duration=1)
         self.alive = False
         for frog in self.app.root.frogs:
             if frog.alive:
@@ -142,9 +185,7 @@ class Frog(Widget):
         else:
             scale_anim.bind(on_complete=lambda anim,
                             widget: self.app.restart())
-        anim.bind(on_complete=lambda anim,
-                  widget: scale_anim.start(self.scatter))
-        anim.start(self)
+        scale_anim.start(self.scatter)
 
     def rotate_to(self, point):
         """Rotate frog to the given point"""
