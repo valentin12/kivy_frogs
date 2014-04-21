@@ -1,2 +1,3 @@
-kivy_frogs
+**Frogs**
 ==========
+implemented with Kivy
