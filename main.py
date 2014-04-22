@@ -8,6 +8,7 @@ from kivy.vector import Vector
 from kivy.animation import Animation
 from kivy.metrics import dp
 from kivy.clock import Clock
+from kivy.core.audio import SoundLoader
 
 from math import pi
 from math import atan2
@@ -34,6 +35,17 @@ def only_running():
 
 
 class FrogApp(App):
+    def __init__(self, **kwargs):
+        super(FrogApp, self).__init__(**kwargs)
+        self.sounds = {
+            "lost": SoundLoader.load("snd/lost.wav"),
+            "won": SoundLoader.load("snd/won.wav"),
+            "died": SoundLoader.load("snd/died.wav"),
+            "eat": SoundLoader.load("snd/eat.wav"),
+            "sink": SoundLoader.load("snd/sink.wav"),
+            "jump": SoundLoader.load("snd/jump.wav")
+        }
+
     def build(self):
         from kivy.base import EventLoop
         EventLoop.ensure_window()
@@ -44,7 +56,6 @@ class FrogApp(App):
         return self.root
 
     def restart(self):
-        print "Restart"
         self.stop()
 
 
@@ -58,12 +69,16 @@ class MainWidget(Widget):
         if self.lives <= 0:
             self.running = False
             self.app.root.status.text = "Lost"
+            self.app.sounds["lost"].play()
             Clock.schedule_once(lambda dt: self.app.restart(), 5)
+        else:
+            self.app.sounds["died"].play()
 
     @only_running()
     def level_won(self):
         self.running = False
         self.app.root.status.text = "Won"
+        self.app.sounds["won"].play()
         Clock.schedule_once(lambda dt: self.app.restart(), 5)
 
 
@@ -96,6 +111,9 @@ class RandomMover(Widget):
 
 
 class Fly(RandomMover):
+    def move(self):
+        super(Fly, self).move()
+
     def eat(self, eater):
         self.app.root.energy += 4
         anim = Animation(center_x=eater.center_x,
@@ -103,7 +121,7 @@ class Fly(RandomMover):
                          duration=.2)
         anim.bind(on_complete=lambda a, b: self.restart())
         anim.start(self)
-
+        self.app.sounds["eat"].play()
 
 
 class Boat(RandomMover):
@@ -119,12 +137,13 @@ class Boat(RandomMover):
 
 class WaterLily(Widget):
     free = BooleanProperty(True)
-    sinking = False
+    sinking = BooleanProperty(False)
     appearing = False
 
     def __init__(self, **kwargs):
         super(WaterLily, self).__init__(**kwargs)
         self.bind(free=self.on_free_changed)
+        self.bind(sinking=self.on_sinking_changed)
         # scale down to simulate sinking
         self.sinking_anim = Animation(scale=.001, duration=1)
         self.sinking_anim.bind(
@@ -167,6 +186,7 @@ class WaterLily(Widget):
             if frog.place == self:
                 Clock.schedule_once(lambda dt: frog.revive(),
                                     self.appear_anim.duration)
+                break
         self.appearing = True
         self.appear_anim.start(self.scatter)
 
@@ -183,6 +203,10 @@ class WaterLily(Widget):
 
     def on_appeared(self):
         self.appearing = False
+
+    def on_sinking_changed(self, instance, value):
+        if value:
+            self.app.sounds["sink"].play()
 
 
 class JumpLine(Widget):
@@ -226,6 +250,7 @@ class JumpLine(Widget):
 class Frog(Widget):
     app = ObjectProperty(None)
     scatter = ObjectProperty(None)
+    player = BooleanProperty(False)
 
     def __init__(self, **kwargs):
         super(Frog, self).__init__(**kwargs)
@@ -300,8 +325,10 @@ class Frog(Widget):
                                          center_y=lily.center_y,
                                          duration=self.jump_duration)
                         anim.bind(on_complete=
-                            lambda a, b: self.set_img(self.sit_img))
+                                  lambda a, b:
+                                  self.set_img(self.sit_img))
                         anim.start(self)
+                        self.app.sounds["jump"].play()
                         Clock.schedule_once(
                             lambda dt: self.set_img(self.jump_img),
                             self.jump_duration / 3)
@@ -322,6 +349,7 @@ class Frog(Widget):
         anim.bind(on_complete=lambda anim,
                   widget: self.kill())
         anim.start(self)
+        self.app.sounds["jump"].play()
         Clock.schedule_once(
             lambda dt: self.set_img(self.jump_img),
             self.jump_duration / 3)

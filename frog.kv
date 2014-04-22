@@ -12,9 +12,9 @@
     keep_ratio: False
 
 <Live@Image>
-    alive_img: "img/heart.png"
-    lost_img: "img/heart_black.png"
-    size: dp(30), sp(30)
+    alive_img: "img/live.png"
+    lost_img: "img/live_lost.png"
+    size: dp(30), sp(50)
     source: self.alive_img
 
 # line to draw jump distance
@@ -33,7 +33,8 @@
 
 <Fly>
     scatter: scatter
-    source: "img/fly.png"
+    fly_img: "img/fly_red_eye.png"
+    source: self.fly_img
     size: dp(30), dp(30)
     speed: 1.5
     rot_change: random()
@@ -59,7 +60,7 @@
 <Boat>
     scatter: scatter
     source: "img/boat.png"
-    size: dp(30), dp(100)
+    size: dp(20), dp(70)
     speed: -1.5
     rot_change: random()
     
@@ -253,8 +254,8 @@
         id: frog
         player: True
         angle: 0
-        sit_img: "img/frog_green_sit.png"
-        jump_img: "img/frog_green_jump.png"
+        sit_img: "img/frog_black_blue_sit.png"
+        jump_img: "img/frog_black_blue_jump.png"
         place: start
         center_x: self.place.center_x
         center_y: self.place.center_y
