@@ -3,7 +3,9 @@ kivy.require("1.8.0")
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.image import Image
-from kivy.properties import ObjectProperty, BooleanProperty
+from kivy.uix.scatter import Scatter
+from kivy.properties import ObjectProperty,\
+    BooleanProperty, ListProperty, StringProperty, NumericProperty
 from kivy.vector import Vector
 from kivy.animation import Animation
 from kivy.metrics import dp
@@ -15,6 +17,7 @@ from math import atan2
 from random import randint
 from random import random
 from random import choice
+from random import shuffle
 
 
 def only_running():
@@ -50,13 +53,16 @@ class FrogApp(App):
         from kivy.base import EventLoop
         EventLoop.ensure_window()
         self.window = EventLoop.window
+        self.window.bind(on_resize=self.on_resize)
+        self.window.size = int(dp(300)), int(dp(300))
         self.root = MainWidget(app=self)
-        self.window.size = (int(self.root.size[0]),
-                            int(self.root.size[1]))
         return self.root
 
     def restart(self):
         self.stop()
+
+    def on_resize(self, instance, width, height):
+        pass
 
 
 class MainWidget(Widget):
@@ -97,8 +103,8 @@ class RandomMover(Widget):
         m = Vector(0, self.speed).rotate(self.scatter.rotation)
         self.pos[0] -= m.x
         self.pos[1] -= m.y
-        # change direction in ca. every 5000th frame
-        if randint(0, 5000) == 10:
+        # change direction in ca. every 1000th frame
+        if randint(0, 1000) == 10:
             self.rot_change = choice([-1, 1]) * random()
         if self.pos[0] < dp(-70) or\
            self.pos[0] > self.app.root.width + dp(40)\
@@ -209,6 +215,10 @@ class WaterLily(Widget):
             self.app.sounds["sink"].play()
 
 
+class MoveableWaterLily(WaterLily):
+    pass
+
+
 class JumpLine(Widget):
 
     @only_running()
@@ -251,7 +261,7 @@ class Frog(Widget):
     app = ObjectProperty(None)
     scatter = ObjectProperty(None)
     player = BooleanProperty(False)
-
+    touched = BooleanProperty(False)
     def __init__(self, **kwargs):
         super(Frog, self).__init__(**kwargs)
         self.die_anim = Animation(scale=.001,
@@ -270,6 +280,7 @@ class Frog(Widget):
             touch.ud["frog"] = self
             self.app.root.jumpline.set(self.center, self.center)
             self.rotate_to(touch.pos)
+            self.touched = True
             return True
         return super(Frog, self).on_touch_down(touch)
 
@@ -281,7 +292,10 @@ class Frog(Widget):
             self.rotate_to(touch.pos)
             # update jump line
             self.app.root.jumpline.end(touch.pos)
+            self.app.root.jumpline.start(self.center)
             return True
+        else:
+            self.touched = False
         return super(Frog, self).on_touch_move(touch)
 
     @only_running()
@@ -291,7 +305,8 @@ class Frog(Widget):
            and "frog" in touch.ud\
            and touch.ud["frog"] == self\
            and self.alive:
-            start = Vector(touch.ud["start_pos"])
+            self.touched = False
+            start = Vector(self.center)
             end = Vector(touch.pos)
             distance = start.distance(end)
             if distance > dp(120):
@@ -305,6 +320,8 @@ class Frog(Widget):
             it = list(self.app.root.lilys[:])
             it.append(self.app.root.start)
             it.append(self.app.root.end)
+            for p in self.app.root.lily_provider:
+                it.extend(p.lilys)
             # you can only jump - and die - if you have energy
             die = self.app.root.energy
             for lily in it:
@@ -314,6 +331,10 @@ class Frog(Widget):
                 except AttributeError:
                     collide = lily.collide_point(*end)
                 if collide:
+                    if type(lily) == MoveableWaterLily:
+                        if lily.text != lily.solution:
+                            print lily.solution
+                            continue
                     die = False
                     if lily.free and self.app.root.energy:
                         self.app.root.energy -= 1
@@ -391,6 +412,84 @@ class Frog(Widget):
 
     def set_img(self, img):
         self.source = img
+
+    def on_pos(self, instance, pos):
+        if self.touched:
+            self.app.root.jumpline.start(self.center)
+
+
+class MathWidget(Widget):
+    number_range = ListProperty((-10, 10))
+    type = StringProperty("add")
+    count = NumericProperty(5)
+    distance = NumericProperty(dp(100))
+    initialized = False
+    def __init__(self, **kwargs):
+        super(MathWidget, self).__init__(**kwargs)
+    
+    def on_pos(self, instance, pos):
+        if self.initialized:
+            for i in range(len(self.lilys)):
+                self.lilys[i].pos = (self.pos[0] + i * self.distance,
+                                     self.pos[1])
+            return
+        self.initialized = True
+        a = randint(*self.number_range)
+        b = randint(*self.number_range)
+        if self.type == "add":
+            self.exercise = "{} + {}".format(a, b)
+            c = a + b
+            r = list(range(self.number_range[0] + self.number_range[0],
+                           self.number_range[1] + self.number_range[1]))
+        elif self.type == "subtract":
+            self.exercise = "{} - {}".format(a, b)
+            c = a - b
+            r = list(range(self.number_range[0] - self.number_range[1],
+                           self.number_range[1] - self.number_range[0]))
+            r.remove(c)
+        self.lilys = [MoveableWaterLily()]
+        self.lilys[0].text = c
+        self.lilys[0].solution = c
+        for i in range(self.count - 1):
+            try:
+                n = r[randint(0, len(r))]
+                r.remove(n)
+                self.lilys.append(
+                    MoveableWaterLily(text=n, solution=c))
+            except IndexError:
+                self.lilys.append(MoveableWaterLily(
+                    text=randint(*self.number_range), solution=c))
+        shuffle(self.lilys)
+        print self.pos
+        for i in range(len(self.lilys)):
+            self.add_widget(self.lilys[i])
+            self.lilys[i].pos = (self.pos[0] + i * self.distance,
+                            self.pos[1])
+        Clock.schedule_interval(lambda dt: self.move(), 1 / 30)
+
+    def move(self):
+        for lily in self.lilys:
+            if self.orientation == "horizontal":
+                lily.x += self.speed
+                if lily.center_x >\
+                   self.pos[0] + self.count * self.distance:
+                    lily.center_x = self.pos[0]
+            else:
+                lily.y += self.speed
+                if lily.center_y >\
+                   self.pos[1] + self.count * self.distance:
+                    lily.center_y = self.pos[1]
+            for frog in self.app.root.frogs:
+                if frog.place == lily:
+                    frog.center = lily.center
+
+
+class GameScatter(Scatter):
+    def on_transform_with_touch(self, touch):
+        if self.y > 0 or self.height < self.app.window.height:
+            self.y = 0
+        elif self.top < self.app.window.height:
+            self.top = self.app.window.height
 
 
 if __name__ == '__main__':

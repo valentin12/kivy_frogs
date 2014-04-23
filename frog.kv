@@ -1,9 +1,10 @@
 #:kivy 1.8.0
 #:import randint random.randint
 #:import random random.random
-# import win kivy.core.window
-# import kivy kivy
-# import Vector kivy.vector.Vector
+#:import win kivy.core.window
+#:import kivy kivy
+#:import Vector kivy.vector.Vector
+
 # the game background image
 <Background>
     source: self.source
@@ -14,6 +15,7 @@
 <Live@Image>
     alive_img: "img/live.png"
     lost_img: "img/live_lost.png"
+    size_hint: None, None
     size: dp(30), sp(50)
     source: self.alive_img
 
@@ -35,6 +37,7 @@
     scatter: scatter
     fly_img: "img/fly_red_eye.png"
     source: self.fly_img
+    size_hint: None, None
     size: dp(30), dp(30)
     speed: 1.5
     rot_change: random()
@@ -60,6 +63,7 @@
 <Boat>
     scatter: scatter
     source: "img/boat.png"
+    size_hint: None, None
     size: dp(20), dp(70)
     speed: -1.5
     rot_change: random()
@@ -88,6 +92,7 @@
     sit_img: self.sit_img
     jump_img: self.jump_img
     source: self.sit_img
+    size_hint: None, None
     size: dp(35), dp(75)
     place: self.place
     alive: True
@@ -113,6 +118,7 @@
 <WaterLily>
     scatter: scatter
     source: "img/water_lily_001.png"
+    size_hint: None, None
     size: dp(60), dp(60)
     free: True
     static: False
@@ -137,6 +143,7 @@
 
 <Base@Image>
     source: self.source
+    size_hint: None, None
     size: dp(200), dp(60)
     allow_stretch: True
     keep_ratio: False
@@ -146,11 +153,40 @@
 <StoneLily@WaterLily>
     static: True
     source: "img/water_lily_stone.png"
+
+
+<MoveableWaterLily>
+    static: True
+    label: label
+    text: self.text
+    solution: self.solution
+    Label:
+        id: label
+        center: root.center
+        text: str(root.text)
+        font_size: dp(20)
+
+
+<MathWidget>
+    app: self.app
+    orientation: "horizontal"
+    number_range: -10, 10
+    count: 5
+    type: "subtract"
+    distance: dp(100)
+    speed: 1
+    exercise: ""
+    Label:
+        font_size: dp(25)
+        text: str(root.exercise)
+        center_x: root.pos[0] + root.count / 2 * root.distance + root.distance / 2
+        y: root.y - 2.5 * self.font_size
     
 
 <MainWidget>
     app: app
-    size: dp(700), dp(660)
+    preferred_size: dp(700), dp(660)
+    size: self.preferred_size
     pos: 0, 0
     frog: frog
     background: background
@@ -159,10 +195,12 @@
     jumpline: jumpline
     status: status
     energy_label: energy_label
-    lilys: (lily, lily_001, lily_002, lily_003, lily_004, lily_005)
+    lilys: (lily, lily_001, lily_003, lily_004, lily_005)
+    lily_provider: [math]
     frogs: (frog, frog1)
     flys: (fly, fly1, fly2, fly3)
     player: frog
+    math: math
     live_imgs: [live, live1, live2]
     lives: 3
     energy: 4
@@ -170,106 +208,6 @@
     Background:
         id: background
         source: "img/background_dark.png"
-
-    Base:
-        id: start
-        x: dp(300)
-        y: 0
-        source: "img/start.png"
-        free: False
-
-    Base:
-        id: end
-        center_x: start.center_x
-        y: start.y + dp(600)
-        source: "img/end.png"
-    
-    WaterLily:
-        app: app
-        id: lily
-        center_x: start.center_x
-        y: start.y + dp(100)
-
-    StoneLily:
-        app: app
-        id: lily_001
-        center_x: start.center_x
-        y: start.y + dp(200)
-        free: False
-
-    WaterLily:
-        app: app
-        id: lily_002
-        center_x: start.center_x
-        y: start.y + dp(330)
-
-    WaterLily:
-        app: app
-        id: lily_003
-        center_x: start.center_x
-        y: start.y + dp(400)
-    
-    WaterLily:
-        app: app
-        id: lily_004
-        center_x: start.center_x
-        y: start.y + dp(520)
-
-    WaterLily:
-        app: app
-        id: lily_005
-        center_x: start.center_x + dp(100)
-        y: start.y + dp(520)
-
-    JumpLine:
-        id: jumpline
-
-    Fly:
-        app: app
-        id: fly
-        center: root.center
-
-    Fly:
-        app: app
-        id: fly1
-        center: dp(200), dp(300)
-
-    Fly:
-        app: app
-        id: fly2
-        center: dp(450), dp(300)
-
-    Fly:
-        app: app
-        id: fly3
-        center: dp(200), dp(60)
-
-    Boat:
-        app: app
-        id: boat
-        center: dp(300), dp(400)
-
-    Frog:
-        app: app
-        id: frog
-        player: True
-        angle: 0
-        sit_img: "img/frog_black_blue_sit.png"
-        jump_img: "img/frog_black_blue_jump.png"
-        place: start
-        center_x: self.place.center_x
-        center_y: self.place.center_y
-
-    Frog:
-        app: app
-        id: frog1
-        angle: 0
-        sit_img: "img/frog_green_sit.png"
-        jump_img: "img/frog_green_jump.png"
-        place: lily_001
-        center_x: self.place.center_x
-        center_y: self.place.center_y
-
     Live:
         id: live
         top: root.height - dp(5)
@@ -285,13 +223,120 @@
 
     Label:
         id: energy_label
+        size_hint: None, None
         top: root.height - dp(5)
         right: root.width
         text: "Energy: " + str(root.energy)
 
     Label:
         id: status
+        size_hint: None, None
         center_x: root.center_x
         center_y: root.center_y
         font_size: dp(30)
+    GameScatter:
+        app: app
+        do_translate: True
+        do_rotate: False
+        do_scale: False
+        y: 0
+        center_x: root.center_x
+        size: root.preferred_size
+        Base:
+            id: start
+            x: dp(300)
+            y: 0
+            source: "img/start.png"
+            free: False
 
+        Base:
+            id: end
+            center_x: start.center_x
+            y: start.y + dp(600)
+            source: "img/end.png"
+
+        WaterLily:
+            app: app
+            id: lily
+            center_x: start.center_x
+            y: start.y + dp(100)
+
+        StoneLily:
+            app: app
+            id: lily_001
+            center_x: start.center_x
+            y: start.y + dp(200)
+            free: False
+
+        MathWidget:
+            app: app
+            id: math
+            center_x: start.center_x - dp(200)
+            y: start.y + dp(280)
+
+        WaterLily:
+            app: app
+            id: lily_003
+            center_x: start.center_x
+            y: start.y + dp(400)
+
+        WaterLily:
+            app: app
+            id: lily_004
+            center_x: start.center_x
+            y: start.y + dp(520)
+
+        WaterLily:
+            app: app
+            id: lily_005
+            center_x: start.center_x + dp(100)
+            y: start.y + dp(520)
+
+        JumpLine:
+            id: jumpline
+
+        Fly:
+            app: app
+            id: fly
+            center: root.center
+
+        Fly:
+            app: app
+            id: fly1
+            center: dp(200), dp(300)
+
+        Fly:
+            app: app
+            id: fly2
+            center: dp(450), dp(300)
+
+        Fly:
+            app: app
+            id: fly3
+            center: dp(200), dp(60)
+
+        Boat:
+            app: app
+            id: boat
+            center: dp(300), dp(400)
+
+        Frog:
+            app: app
+            id: frog
+            player: True
+            angle: 0
+            sit_img: "img/frog_black_blue_sit.png"
+            jump_img: "img/frog_black_blue_jump.png"
+            place: start
+            center_x: self.place.center_x
+            center_y: self.place.center_y
+
+        Frog:
+            app: app
+            id: frog1
+            angle: 0
+            sit_img: "img/frog_green_sit.png"
+            jump_img: "img/frog_green_jump.png"
+            place: lily_001
+            center_x: self.place.center_x
+            center_y: self.place.center_y
