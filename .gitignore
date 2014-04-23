@@ -1,4 +1,4 @@
-.pyc
+*.pyc
 *~
 *.blend1
 *.blend2

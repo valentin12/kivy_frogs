@@ -19,6 +19,8 @@ from random import random
 from random import choice
 from random import shuffle
 
+import level_parser
+
 
 def only_running():
     """Check if a username exists"""
@@ -54,8 +56,8 @@ class FrogApp(App):
         EventLoop.ensure_window()
         self.window = EventLoop.window
         self.window.bind(on_resize=self.on_resize)
-        self.window.size = int(dp(300)), int(dp(300))
-        self.root = MainWidget(app=self)
+        self.root = level_parser.build_level(
+            "levels/level_001.txt", self)
         return self.root
 
     def restart(self):
@@ -107,9 +109,9 @@ class RandomMover(Widget):
         if randint(0, 1000) == 10:
             self.rot_change = choice([-1, 1]) * random()
         if self.pos[0] < dp(-70) or\
-           self.pos[0] > self.app.root.width + dp(40)\
+           self.pos[0] > self.app.root.game_scatter.width + dp(40)\
            or self.pos[1] < dp(-70) or\
-           self.pos[1] > self.app.root.height + dp(40):
+           self.pos[1] > self.app.root.game_scatter.height + dp(40):
             self.scatter.rotation -= 180
 
     def restart(self):
@@ -215,6 +217,10 @@ class WaterLily(Widget):
             self.app.sounds["sink"].play()
 
 
+class StoneLily(WaterLily):
+    pass
+
+
 class MoveableWaterLily(WaterLily):
     pass
 
@@ -262,6 +268,7 @@ class Frog(Widget):
     scatter = ObjectProperty(None)
     player = BooleanProperty(False)
     touched = BooleanProperty(False)
+
     def __init__(self, **kwargs):
         super(Frog, self).__init__(**kwargs)
         self.die_anim = Animation(scale=.001,
@@ -354,6 +361,8 @@ class Frog(Widget):
                             lambda dt: self.set_img(self.jump_img),
                             self.jump_duration / 3)
                         # check if player reached the end
+                        print "player: " + str(self.player)
+                        print "lily == end: " + str(lily == self.app.root.end)
                         if self.player and lily == self.app.root.end:
                             self.app.root.level_won()
                         break
@@ -424,9 +433,7 @@ class MathWidget(Widget):
     count = NumericProperty(5)
     distance = NumericProperty(dp(100))
     initialized = False
-    def __init__(self, **kwargs):
-        super(MathWidget, self).__init__(**kwargs)
-    
+
     def on_pos(self, instance, pos):
         if self.initialized:
             for i in range(len(self.lilys)):
@@ -464,7 +471,7 @@ class MathWidget(Widget):
         for i in range(len(self.lilys)):
             self.add_widget(self.lilys[i])
             self.lilys[i].pos = (self.pos[0] + i * self.distance,
-                            self.pos[1])
+                                 self.pos[1])
         Clock.schedule_interval(lambda dt: self.move(), 1 / 30)
 
     def move(self):
