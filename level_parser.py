@@ -1,6 +1,6 @@
 from kivy.uix.widget import Widget
-from main import MainWidget, WaterLily, StoneLily,\
-    MathWidget, Frog, JumpLine, Fly, Boat
+from main import GameWidget, WaterLily, StoneLily,\
+    MathWidget, Frog, JumpLine, Fly, Boat, SwitchLily
 from kivy.metrics import dp
 
 
@@ -32,8 +32,8 @@ def build_level(filename, app):
         return x, y
 
     level = parse_level(filename)
-    root = MainWidget(app=app)
-    app.root = root
+    root = GameWidget(app=app)
+    app.game = root
     # setup level specific things
     distance = dp(100)
     l = level["level"][0]
@@ -121,6 +121,24 @@ def build_level(filename, app):
                 m.y = y
             root.game_scatter.before_jumpline.add_widget(m)
             root.lily_provider.append(m)
+    if "switchlily" in level:
+        for lily in level["switchlily"]:
+            l = SwitchLily(app=app, root=root)
+            if "id" in lily:
+                l.id = lily["id"]
+                if l.id not in root.objects:
+                    root.objects[l.id] = l
+            if "pos" in lily:
+                x, y = calculate_point(
+                    lily["pos"].split(","), distance)
+                l.center_x = x
+                l.y = y
+            if "free" in lily:
+                l.free = lily["free"] == "True"
+            if "controlled" in lily:
+                l.controlled = root.objects[lily["controlled"]]
+            root.game_scatter.before_jumpline.add_widget(l)
+            root.lilys.append(l)
     # add the flys
     for i in range(flys):
         f = Fly(app=app, root=root)
@@ -155,5 +173,5 @@ def build_level(filename, app):
             if "jump_img" in frog:
                 f.jump_img = frog["jump_img"]
             root.frogs.append(f)
-            root.game_scatter.add_widget(f)
+            root.game_scatter.after_jumplines.add_widget(f)
     return root

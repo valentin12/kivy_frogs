@@ -27,7 +27,7 @@ def only_running():
     def on_decorator(func):
         def on_call(*args):
             try:
-                if args[0].app.root.running:
+                if args[0].app.game.running:
                     return func(*args)
                 else:
                     def not_running():
@@ -56,18 +56,24 @@ class FrogApp(App):
         EventLoop.ensure_window()
         self.window = EventLoop.window
         self.window.bind(on_resize=self.on_resize)
-        self.root = level_parser.build_level(
+        self.game = level_parser.build_level(
             "levels/level_001.txt", self)
-        return self.root
+        self.main = Widget(app=self, size=self.window.size)
+        self.main.add_widget(self.game)
+        return self.main
 
     def restart(self):
-        self.stop()
+        self.main.remove_widget(self.game)
+        del self.game
+        self.game = level_parser.build_level(
+            "levels/level_001.txt", self)
+        self.main.add_widget(self.game)
 
     def on_resize(self, instance, width, height):
         pass
 
 
-class MainWidget(Widget):
+class GameWidget(Widget):
 
     @only_running()
     def decrement_lives(self):
@@ -76,7 +82,7 @@ class MainWidget(Widget):
             self.lives].lost_img
         if self.lives <= 0:
             self.running = False
-            self.app.root.status.text = "Lost"
+            self.app.game.status.text = "Lost"
             self.app.sounds["lost"].play()
             Clock.schedule_once(lambda dt: self.app.restart(), 5)
         else:
@@ -85,7 +91,7 @@ class MainWidget(Widget):
     @only_running()
     def level_won(self):
         self.running = False
-        self.app.root.status.text = "Won"
+        self.app.game.status.text = "Won"
         self.app.sounds["won"].play()
         Clock.schedule_once(lambda dt: self.app.restart(), 5)
 
@@ -109,9 +115,9 @@ class RandomMover(Widget):
         if randint(0, 1000) == 10:
             self.rot_change = choice([-1, 1]) * random()
         if self.pos[0] < dp(-70) or\
-           self.pos[0] > self.app.root.game_scatter.width + dp(40)\
+           self.pos[0] > self.app.game.game_scatter.width + dp(40)\
            or self.pos[1] < dp(-70) or\
-           self.pos[1] > self.app.root.game_scatter.height + dp(40):
+           self.pos[1] > self.app.game.game_scatter.height + dp(40):
             self.scatter.rotation -= 180
 
     def restart(self):
@@ -123,7 +129,7 @@ class Fly(RandomMover):
         super(Fly, self).move()
 
     def eat(self, eater):
-        self.app.root.energy += 4
+        self.app.game.energy += 4
         anim = Animation(center_x=eater.center_x,
                          center_y=eater.center_y,
                          duration=.2)
@@ -138,9 +144,10 @@ class Boat(RandomMover):
         self.check_collision()
 
     def check_collision(self):
-        for lily in self.app.root.lilys:
+        for lily in self.app.game.lilys:
             if lily.collide_widget(self):
-                lily.force_sinking()
+                if not lily.static:
+                    lily.force_sinking()
 
 
 class WaterLily(Widget):
@@ -184,13 +191,15 @@ class WaterLily(Widget):
 
     @only_running()
     def force_sinking(self):
-        if not self.static and not self.sinking and not self.appearing:
+        if not self.sinking:
+            Animation.cancel_all(self.scatter)
+            self.appearing = False
             self.sinking = True
             self.sinking_anim.start(self.scatter)
 
     def appear(self, dt):
         self.sinking = False
-        for frog in self.app.root.frogs:
+        for frog in self.app.game.frogs:
             if frog.place == self:
                 Clock.schedule_once(lambda dt: frog.revive(),
                                     self.appear_anim.duration)
@@ -201,13 +210,14 @@ class WaterLily(Widget):
     def on_sank(self):
         # kill all frogs on the lily
         reappear_after = 3
-        for frog in self.app.root.frogs:
+        for frog in self.app.game.frogs:
             if frog.place == self:
                 frog.kill()
                 # live lost, don't wait so long
                 reappear_after = 1
         # wait under water, then appear again
-        Clock.schedule_once(self.appear, reappear_after)
+        if self.auto_reappear:
+            Clock.schedule_once(self.appear, reappear_after)
 
     def on_appeared(self):
         self.appearing = False
@@ -223,6 +233,28 @@ class StoneLily(WaterLily):
 
 class MoveableWaterLily(WaterLily):
     pass
+
+
+class SwitchLily(WaterLily):
+    def __init__(self, **kwargs):
+        super(SwitchLily, self).__init__(**kwargs)
+        self.bind(pressed=self.on_pressed)
+        self.bind(controlled=self.on_controlled_change)
+
+    def on_pressed(self, instance, value):
+        if self.controlled:
+            if value:
+                self.controlled.appear(None)
+            else:
+                self.controlled.force_sinking()
+
+    def on_controlled_change(self, instance, value):
+        self.controlled.auto_reappear = False
+        self.controlled.static = True
+        if self.pressed:
+            self.controlled.appear(None)
+        else:
+            self.controlled.force_sinking()
 
 
 class JumpLine(Widget):
@@ -266,8 +298,10 @@ class JumpLine(Widget):
 class Frog(Widget):
     app = ObjectProperty(None)
     scatter = ObjectProperty(None)
+    jumpline = ObjectProperty(None, allownone=True)
     player = BooleanProperty(False)
     touched = BooleanProperty(False)
+    anim_running = BooleanProperty(False)
 
     def __init__(self, **kwargs):
         super(Frog, self).__init__(**kwargs)
@@ -285,7 +319,14 @@ class Frog(Widget):
         if self.collide_point(*touch.pos) and self.alive:
             touch.ud["start_pos"] = self.center
             touch.ud["frog"] = self
-            self.app.root.jumpline.set(self.center, self.center)
+            if self.jumpline:
+                self.app.game.game_scatter.jumplines.remove_widget(
+                    self.jumpline)
+            jumpline = JumpLine()
+            jumpline.set(self.center, self.center)
+            touch.ud["jumpline"] = jumpline
+            self.jumpline = jumpline
+            self.app.game.game_scatter.jumplines.add_widget(jumpline)
             self.rotate_to(touch.pos)
             self.touched = True
             return True
@@ -295,11 +336,14 @@ class Frog(Widget):
     def on_touch_move(self, touch):
         if "start_pos" in touch.ud\
            and "frog" in touch.ud\
+           and "jumpline" in touch.ud\
+           and touch.ud["jumpline"] == self.jumpline\
+           and self.jumpline\
            and touch.ud["frog"] == self:
             self.rotate_to(touch.pos)
             # update jump line
-            self.app.root.jumpline.end(touch.pos)
-            self.app.root.jumpline.start(self.center)
+            self.jumpline.end(touch.pos)
+            self.jumpline.start(self.center)
             return True
         else:
             self.touched = False
@@ -307,11 +351,16 @@ class Frog(Widget):
 
     @only_running()
     def on_touch_up(self, touch):
-        self.app.root.jumpline.set((0, 0), (0, 0))
         if "start_pos" in touch.ud\
            and "frog" in touch.ud\
+           and "jumpline" in touch.ud\
+           and touch.ud["jumpline"] == self.jumpline\
+           and self.jumpline\
            and touch.ud["frog"] == self\
            and self.alive:
+            self.app.game.game_scatter.jumplines.remove_widget(
+                self.jumpline)
+            self.jumpline = None
             self.touched = False
             start = Vector(self.center)
             end = Vector(touch.pos)
@@ -320,17 +369,17 @@ class Frog(Widget):
                 dir = Vector((
                     start.x - end.x, start.y - end.y))
                 end = start - dir * dp(120) / distance
-            for fly in self.app.root.flys:
+            for fly in self.app.game.flys:
                 if fly.collide_point(*end):
                     fly.eat(self)
                     return True
-            it = list(self.app.root.lilys[:])
-            it.append(self.app.root.start)
-            it.append(self.app.root.end)
-            for p in self.app.root.lily_provider:
+            it = list(self.app.game.lilys[:])
+            it.append(self.app.game.start)
+            it.append(self.app.game.end)
+            for p in self.app.game.lily_provider:
                 it.extend(p.lilys)
             # you can only jump - and die - if you have energy
-            die = self.app.root.energy
+            die = self.app.game.energy
             for lily in it:
                 collide = False
                 try:
@@ -340,31 +389,30 @@ class Frog(Widget):
                 if collide:
                     if type(lily) == MoveableWaterLily:
                         if lily.text != lily.solution:
-                            print lily.solution
                             continue
                     die = False
-                    if lily.free and self.app.root.energy:
-                        self.app.root.energy -= 1
+                    if lily.free and self.app.game.energy:
+                        self.app.game.energy -= 1
                         self.place.free = True
                         self.place = lily
                         lily.free = False
                         self.rotate_to(lily.center)
+                        self.anim_running = True
                         anim = Animation(center_x=lily.center_x,
                                          center_y=lily.center_y,
                                          duration=self.jump_duration)
-                        anim.bind(on_complete=
-                                  lambda a, b:
-                                  self.set_img(self.sit_img))
+                        def on_anim_complete(a, b):
+                            self.set_img(self.sit_img)
+                            self.set_anim_running(False)
+                        anim.bind(on_complete=on_anim_complete)
                         anim.start(self)
                         self.app.sounds["jump"].play()
                         Clock.schedule_once(
                             lambda dt: self.set_img(self.jump_img),
                             self.jump_duration / 3)
                         # check if player reached the end
-                        print "player: " + str(self.player)
-                        print "lily == end: " + str(lily == self.app.root.end)
-                        if self.player and lily == self.app.root.end:
-                            self.app.root.level_won()
+                        if self.player and lily == self.app.game.end:
+                            self.app.game.level_won()
                         break
             else:
                 if die:
@@ -378,6 +426,7 @@ class Frog(Widget):
                          duration=self.jump_duration)
         anim.bind(on_complete=lambda anim,
                   widget: self.kill())
+        self.anim_running = True
         anim.start(self)
         self.app.sounds["jump"].play()
         Clock.schedule_once(
@@ -394,7 +443,8 @@ class Frog(Widget):
     @only_running()
     def kill(self):
         self.alive = False
-        self.app.root.decrement_lives()
+        self.app.game.decrement_lives()
+        self.anim_running = True
         self.die_anim.start(self.scatter)
 
     @only_running()
@@ -404,7 +454,10 @@ class Frog(Widget):
         anim = Animation(center_x=self.place.center_x,
                          center_y=self.place.center_y,
                          duration=self.revive_duration)
+        anim.bind(on_complete=lambda a, b:
+                  self.set_anim_running(False))
         self.alive = True
+        self.anim_running = True
         scale_anim.start(self.scatter)
         anim.start(self)
         if not self.place.static:
@@ -420,11 +473,16 @@ class Frog(Widget):
         self.scatter.rotation = -angle_changed
 
     def set_img(self, img):
+        """Method to set img in lambdas"""
         self.source = img
 
     def on_pos(self, instance, pos):
-        if self.touched:
-            self.app.root.jumpline.start(self.center)
+        if self.touched and self.jumpline:
+            self.jumpline.start(self.center)
+
+    def set_anim_running(self, b):
+        """Method to set anim in lambdas"""
+        self.anim_running = b
 
 
 class MathWidget(Widget):
@@ -467,7 +525,6 @@ class MathWidget(Widget):
                 self.lilys.append(MoveableWaterLily(
                     text=randint(*self.number_range), solution=c))
         shuffle(self.lilys)
-        print self.pos
         for i in range(len(self.lilys)):
             self.add_widget(self.lilys[i])
             self.lilys[i].pos = (self.pos[0] + i * self.distance,
@@ -486,9 +543,10 @@ class MathWidget(Widget):
                 if lily.center_y >\
                    self.pos[1] + self.count * self.distance:
                     lily.center_y = self.pos[1]
-            for frog in self.app.root.frogs:
+            for frog in self.app.game.frogs:
                 if frog.place == lily:
-                    frog.center = lily.center
+                    if not frog.anim_running:
+                        frog.center = lily.center
 
 
 class GameScatter(Scatter):

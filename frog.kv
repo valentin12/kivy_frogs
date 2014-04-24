@@ -102,6 +102,7 @@
     place: self.place
     alive: True
     player: False
+    jumpline: None
     Scatter:
         id: scatter
         do_rotation: False
@@ -128,6 +129,7 @@
     size: dp(60), dp(60)
     free: True
     static: False
+    auto_reappear: True
     Scatter:
         id: scatter
         do_rotation: False
@@ -159,10 +161,12 @@
 <StoneLily>
     static: True
     source: "img/water_lily_stone.png"
+    auto_reappear: False
 
 
 <MoveableWaterLily>
     static: True
+    auto_reappear: False
     label: label
     text: self.text
     solution: self.solution
@@ -171,6 +175,16 @@
         center: root.center
         text: str(root.text)
         font_size: dp(20)
+
+
+<SwitchLily>
+    static: True
+    auto_reappear: False
+    not_pressed_img: "img/lily_switch_not_pressed.png"
+    pressed_img: "img/lily_switch_pressed.png"
+    pressed: not self.free
+    source: self.pressed_img if self.pressed else self.not_pressed_img
+    controlled: self.controlled
 
 
 <MathWidget>
@@ -189,15 +203,15 @@
         y: root.y - 2.5 * self.font_size
     
 
-<MainWidget>
+<GameWidget>
     app: app
+    id: game
     preferred_size: dp(600), dp(700)
-    size: self.preferred_size
-    pos: 0, 0
+    center_x: app.window.width / 2
+    y: 0
     background: background
     start: start
     end: end
-    jumpline: jumpline
     status: status
     energy_label: energy_label
     game_scatter: game_scatter
@@ -220,11 +234,13 @@
         do_translate: True
         do_rotate: False
         do_scale: False
+        size: game.preferred_size
         y: 0
-        center_x: root.center_x
-        size: root.preferred_size
+        center_x: game.center_x
         auto_bring_to_front: False
         before_jumpline: before_jumpline
+        jumplines: jumplines
+        after_jumplines: after_jumplines
         Base:
             id: start
             x: dp(300)
@@ -241,32 +257,36 @@
         Widget:
             id: before_jumpline
 
-        JumpLine:
-            id: jumpline
+        Widget:
             index: 1
+            id: jumplines
+
+        Widget:
+            id: after_jumplines
+
     Live:
         id: live
-        top: root.height - dp(5)
+        top: app.window.height - dp(5)
         x: dp(10)
     Live:
         id: live1
-        top: root.height - dp(5)
+        top: app.window.height - dp(5)
         x: dp(50)
     Live:
         id: live2
-        top: root.height - dp(5)
+        top: app.window.height - dp(5)
         x: dp(90)
 
     Label:
         id: energy_label
         size_hint: None, None
-        top: root.height - dp(5)
-        right: root.width
-        text: "Energy: " + str(root.energy)
+        top: app.window.height - dp(5)
+        right: app.window.width
+        text: "Energy: " + str(game.energy)
 
     Label:
         id: status
         size_hint: None, None
-        center_x: root.center_x
-        center_y: root.center_y
+        center_x: app.window.width / 2
+        center_y: app.window.height / 2
         font_size: dp(30)
