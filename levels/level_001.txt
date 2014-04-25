@@ -2,9 +2,9 @@ level size=6,7 energy=4 flys=4 boats=1
 background source=img/background_dark.png
 start pos=3,0 source=img/start.png free=False
 end pos=3,6 source=img/end.png
-waterlily id=lily pos=3,1
+math id=math pos=1,1
 stonelily id=lily_001 pos=3,2 free=False
-math id=math pos=1,3
+interval id=interval pos=1,3
 switchlily id=lily_003 pos=3,4 controlled=lily_004
 waterlily id=lily_002 pos=2,5
 waterlily id=lily_004 pos=3,5

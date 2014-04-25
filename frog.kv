@@ -189,20 +189,31 @@
     controlled: self.controlled
 
 
-<MathWidget>
+<ExerciseWidget>
     app: app
     orientation: "horizontal"
-    number_range: -10, 10
     count: 5
-    type: "subtract"
     distance: dp(100)
     speed: 1
     exercise: ""
+    label: label
     Label:
+        id: label
         font_size: dp(25)
         text: str(root.exercise)
         center_x: root.pos[0] + root.count / 2 * root.distance + root.distance / 2
         y: root.y - 2.5 * self.font_size
+        halign: "center"
+    
+
+<MathWidget>
+    app: app
+    number_range: -10, 10
+    type: "subtract"
+
+
+<IntervalWidget>
+    exercise: "Which interval is it?\nPlay"
     
 
 <GameWidget>

@@ -1,6 +1,6 @@
 from kivy.uix.widget import Widget
 from main import GameWidget, WaterLily, StoneLily,\
-    MathWidget, Frog, JumpLine, Fly, Boat, SwitchLily
+    MathWidget, Frog, JumpLine, Fly, Boat, SwitchLily, IntervalWidget
 from kivy.metrics import dp
 
 
@@ -132,13 +132,27 @@ def build_level(filename, app, root):
                 m.id = math["id"]
                 if m.id not in root.objects:
                     root.objects[m.id] = m
-            if "pos" in lily:
+            if "pos" in math:
                 x, y = calculate_point(
                     math["pos"].split(","), distance)
                 m.center_x = x
                 m.y = y
             root.game_scatter.before_jumpline.add_widget(m)
             root.lily_provider.append(m)
+    if "interval" in level:
+        for interval in level["interval"]:
+            i = IntervalWidget()
+            if "id" in interval:
+                i.id = interval["id"]
+                if i.id not in root.objects:
+                    root.objects[i.id] = i
+            if "pos" in interval:
+                x, y = calculate_point(
+                    interval["pos"].split(","), distance)
+                i.center_x = x
+                i.y = y
+            root.game_scatter.before_jumpline.add_widget(i)
+            root.lily_provider.append(i)
     if "switchlily" in level:
         for lily in level["switchlily"]:
             l = SwitchLily(app=app, root=root)
@@ -185,8 +199,7 @@ def build_level(filename, app, root):
                     root.objects[f.id] = f
             if "place" in frog:
                 f.place = dict(root.objects.items() +
-                               root.standard_objects.items()
-                           )[frog["place"]]
+                               root.standard_objects.items())[frog["place"]]
                 f.place.free = False
                 f.center_x = f.place.center_x
                 f.center_y = f.place.center_y

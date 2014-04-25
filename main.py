@@ -57,7 +57,16 @@ class FrogApp(App):
             "eat": SoundLoader.load("snd/eat.wav"),
             "sink": SoundLoader.load("snd/sink.wav"),
             "jump": SoundLoader.load("snd/jump.wav"),
-            "background": SoundLoader.load("snd/background.ogg")
+            "background": SoundLoader.load("snd/background.ogg"),
+            # sounds for IntervalWidget
+            "c1": SoundLoader.load("snd/c1.ogg"),
+            "d1": SoundLoader.load("snd/d1.ogg"),
+            "e1": SoundLoader.load("snd/e1.ogg"),
+            "f1": SoundLoader.load("snd/f1.ogg"),
+            "g1": SoundLoader.load("snd/g1.ogg"),
+            "a1": SoundLoader.load("snd/a1.ogg"),
+            "h1": SoundLoader.load("snd/h1.ogg"),
+            "c2": SoundLoader.load("snd/c2.ogg")
         }
 
     def build(self):
@@ -342,7 +351,7 @@ class SwitchLily(WaterLily):
 
 
 class JumpLine(Widget):
-
+    raw_end = (0, 0)
     @only_running()
     def set(self, point1, point2):
         """Set start and end point of the Line"""
@@ -361,6 +370,7 @@ class JumpLine(Widget):
         """Set the end point"""
         self.x2 = point[0]
         self.y2 = point[1]
+        self.raw_end = (self.x2, self.y2)
         self.cut_to_max()
 
     def cut_to_max(self):
@@ -369,7 +379,7 @@ class JumpLine(Widget):
         start and end point is < max
         """
         start = Vector((self.x1, self.y1))
-        end = Vector((self.x2, self.y2))
+        end = Vector(self.raw_end)
         distance = start.distance(end)
         if distance > self.max:
             dir = Vector((
@@ -485,6 +495,7 @@ class Frog(Widget):
                         anim = Animation(center_x=lily.center_x,
                                          center_y=lily.center_y,
                                          duration=self.jump_duration)
+
                         def on_anim_complete(a, b):
                             self.set_img(self.sit_img)
                             self.set_anim_running(False)
@@ -526,6 +537,10 @@ class Frog(Widget):
 
     @only_running()
     def kill(self):
+        if self.jumpline:
+            self.app.game.game_scatter.jumplines.remove_widget(
+                self.jumpline)
+            self.jumpline = None
         self.alive = False
         self.app.game.decrement_lives()
         self.anim_running = True
@@ -563,13 +578,33 @@ class Frog(Widget):
     def on_pos(self, instance, pos):
         if self.touched and self.jumpline:
             self.jumpline.start(self.center)
+            self.rotate_to((self.jumpline.x2, self.jumpline.y2))
 
     def set_anim_running(self, b):
         """Method to set anim in lambdas"""
         self.anim_running = b
 
 
-class MathWidget(Widget):
+class ExerciseWidget(Widget):
+    def move(self):
+        for lily in self.lilys:
+            if self.orientation == "horizontal":
+                lily.x += self.speed
+                if lily.center_x >\
+                   self.pos[0] + self.count * self.distance:
+                    lily.center_x = self.pos[0]
+            else:
+                lily.y += self.speed
+                if lily.center_y >\
+                   self.pos[1] + self.count * self.distance:
+                    lily.center_y = self.pos[1]
+            for frog in self.app.game.frogs:
+                if frog.place == lily:
+                    if not frog.anim_running:
+                        frog.center = lily.center
+
+
+class MathWidget(ExerciseWidget):
     number_range = ListProperty((-10, 10))
     type = StringProperty("add")
     count = NumericProperty(5)
@@ -655,22 +690,64 @@ class MathWidget(Widget):
                                  self.pos[1])
         Clock.schedule_interval(lambda dt: self.move(), 1 / 30)
 
-    def move(self):
-        for lily in self.lilys:
-            if self.orientation == "horizontal":
-                lily.x += self.speed
-                if lily.center_x >\
-                   self.pos[0] + self.count * self.distance:
-                    lily.center_x = self.pos[0]
-            else:
-                lily.y += self.speed
-                if lily.center_y >\
-                   self.pos[1] + self.count * self.distance:
-                    lily.center_y = self.pos[1]
-            for frog in self.app.game.frogs:
-                if frog.place == lily:
-                    if not frog.anim_running:
-                        frog.center = lily.center
+
+class IntervalWidget(ExerciseWidget):
+    count = NumericProperty(5)
+    distance = NumericProperty(dp(100))
+    initialized = False
+    intervals = [["c1", "P1"],
+                 ["d1", "M2"],
+                 ["e1", "M3"],
+                 ["f1", "P4"],
+                 ["g1", "P5"],
+                 ["a1", "M6"],
+                 ["h1", "M7"],
+                 ["c2", "P8"]]
+
+    def __init__(self, **kwargs):
+        super(IntervalWidget, self).__init__(**kwargs)
+        self.label.bind(on_touch_down=self.on_label_touched)
+
+    def on_label_touched(self, instance, touch):
+        if self.label.collide_point(*touch.pos):
+            self.play_sound()
+
+    def on_pos(self, instance, pos):
+        if self.initialized:
+            for i in range(len(self.lilys)):
+                self.lilys[i].pos = (self.pos[0] + i * self.distance,
+                                     self.pos[1])
+            return
+        self.initialized = True
+        self.solution = choice(self.intervals)
+        # other posibilities
+        psb = self.intervals[:]
+        psb.remove(self.solution)
+        self.lilys = [MoveableWaterLily()]
+        self.lilys[0].text = self.solution[1]
+        self.lilys[0].solution = self.solution[1]
+        for i in range(self.count - 1):
+            try:
+                n = choice(psb)
+                psb.remove(n)
+                self.lilys.append(
+                    MoveableWaterLily(text=n[1], solution=self.solution[1]))
+            except IndexError:
+                self.lilys.append(MoveableWaterLily(
+                    text=choice(self.intervals)[1],
+                    solution=self.solution[1]))
+        shuffle(self.lilys)
+        for i in range(len(self.lilys)):
+            self.add_widget(self.lilys[i])
+            self.lilys[i].pos = (self.pos[0] + i * self.distance,
+                                 self.pos[1])
+        Clock.schedule_interval(lambda dt: self.move(), 1 / 30)
+
+    def play_sound(self):
+        self.app.sounds["c1"].play()
+        Clock.schedule_once(lambda dt:
+                            self.app.sounds[self.solution[0]].play(),
+                            self.app.sounds["c1"].length + .5)
 
 
 class GameScatter(Scatter):
