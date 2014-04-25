@@ -11,6 +11,13 @@ from kivy.animation import Animation
 from kivy.metrics import dp
 from kivy.clock import Clock
 from kivy.core.audio import SoundLoader
+from kivy.uix.settings import SettingNumeric, SettingItem, SettingSpacer
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.popup import Popup
+from kivy.uix.slider import Slider
+from kivy.uix.button import Button
+from kivy.uix.label import Label
+from kivy.config import Config
 
 from math import pi
 from math import atan2
@@ -42,13 +49,15 @@ def only_running():
 class FrogApp(App):
     def __init__(self, **kwargs):
         super(FrogApp, self).__init__(**kwargs)
+        # setup all sounds
         self.sounds = {
             "lost": SoundLoader.load("snd/lost.wav"),
             "won": SoundLoader.load("snd/won.wav"),
             "died": SoundLoader.load("snd/died.wav"),
             "eat": SoundLoader.load("snd/eat.wav"),
             "sink": SoundLoader.load("snd/sink.wav"),
-            "jump": SoundLoader.load("snd/jump.wav")
+            "jump": SoundLoader.load("snd/jump.wav"),
+            "background": SoundLoader.load("snd/background.ogg")
         }
 
     def build(self):
@@ -56,21 +65,76 @@ class FrogApp(App):
         EventLoop.ensure_window()
         self.window = EventLoop.window
         self.window.bind(on_resize=self.on_resize)
+        self.game = GameWidget(app=self)
         self.game = level_parser.build_level(
-            "levels/level_001.txt", self)
+            "levels/level_001.txt", self, self.game)
+        # setup scatter scale. I wanted to allow translation and scale,
+        # but the user was able to rotate then too and so I left the scale
+        # and made it to a setting
+        self.game.game_scatter.scale = float(self.config.getfloat(
+            "General", "Zoom"))
+        # setup background sound
+        self.sounds["background"].loop = True
+        self.sounds["background"].volume = float(
+            self.config.getfloat("General", "Background")) / 100.
+        self.sounds["background"].play()
+        # set volume for all sounds
+        volume = float(self.config.getfloat("General", "Sound")) / 100.
+        for sound in self.sounds.values():
+            if sound != self.sounds["background"]:
+                sound.volume = volume
+        # add game to main widget that it gets displayed
         self.main = Widget(app=self, size=self.window.size)
         self.main.add_widget(self.game)
         return self.main
 
     def restart(self):
-        self.main.remove_widget(self.game)
-        del self.game
-        self.game = level_parser.build_level(
-            "levels/level_001.txt", self)
-        self.main.add_widget(self.game)
+        level_parser.build_level(
+            "levels/level_001.txt", self, self.game)
 
     def on_resize(self, instance, width, height):
         pass
+
+    def build_config(self, config):
+        config.adddefaultsection("General")
+        config.setdefault("General", "Background", "50.0")
+        config.setdefault("General", "Sound", "100.0")
+        config.setdefault("General", "Zoom", "1.0")
+        config.setdefault("General", "First", "True")
+
+        config.add_section("Math")
+        config.setdefault("Math", "Min", "-10")
+        config.setdefault("Math", "Max", "10")
+        config.setdefault("Math", "TypeOfCalculation", "add")
+        Config = config
+
+    def build_settings(self, settings):
+        settings.register_type("numeric_range", SettingNumericRange)
+        settings.register_type("half_open_numeric_range",
+                               SettingHalfOpenNumericRange)
+        settings.add_json_panel("Frog Settings",
+                                self.config, filename="frogs.json")
+        self.settings = settings
+
+    def on_config_change(self, config, section, key, value):
+        token = (section, key)
+        if token == ("General", "Background"):
+            self.sounds["background"].volume = float(value) / 100.
+        elif token == ("General", "Sound"):
+            for sound in self.sounds.values():
+                if sound != self.sounds["background"]:
+                    sound.volume = float(value) / 100.
+        elif token == ("General", "Zoom"):
+            self.game.game_scatter.scale = float(value)
+        elif token == ("Math", "Min"):
+            if config.getint("Math", "Max") < int(value):
+                config.set("Math", "Max", int(value) + 10)
+                config.write()
+        elif token == ("Math", "Max"):
+            if config.getint("Math", "Min") > int(value):
+                config.set("Math", "Max", str(
+                    int(config.getint("Math", "Min")) + 10))
+                config.write()
 
 
 class GameWidget(Widget):
@@ -102,26 +166,37 @@ class Background(Image):
 
 class RandomMover(Widget):
     """Moves over the field in a random way"""
+    last_rotated = BooleanProperty(False)
+
     def __init__(self, **kwargs):
         super(RandomMover, self).__init__(**kwargs)
-        Clock.schedule_interval(lambda dt: self.move(), 1 / 60.)
+        Clock.schedule_interval(lambda dt: self.move(), 1 / 30.)
 
     def move(self):
         self.scatter.rotation += self.rot_change
-        m = Vector(0, self.speed).rotate(self.scatter.rotation)
+        m = Vector(0, 2 * self.speed).rotate(self.scatter.rotation)
         self.pos[0] -= m.x
         self.pos[1] -= m.y
-        # change direction in ca. every 1000th frame
-        if randint(0, 1000) == 10:
+        # change direction in ca. every 300th frame
+        if randint(0, 300) == 10:
             self.rot_change = choice([-1, 1]) * random()
         if self.pos[0] < dp(-70) or\
            self.pos[0] > self.app.game.game_scatter.width + dp(40)\
            or self.pos[1] < dp(-70) or\
            self.pos[1] > self.app.game.game_scatter.height + dp(40):
-            self.scatter.rotation -= 180
+            if self.last_rotated:
+                self.restart()
+            else:
+                self.scatter.rotation -= 180
+                self.last_rotated = True
+        else:
+            self.last_rotated = False
 
     def restart(self):
-        self.center = (dp(-20), dp(150))
+        self.last_rotated = False
+        self.center = (randint(dp(40), self.app.game.width - dp(40)),
+                       randint(dp(40), self.app.game.height - dp(40)))
+        self.scatter.rotation = randint(0, 360)
 
 
 class Fly(RandomMover):
@@ -153,7 +228,7 @@ class Boat(RandomMover):
 class WaterLily(Widget):
     free = BooleanProperty(True)
     sinking = BooleanProperty(False)
-    appearing = False
+    appearing = BooleanProperty(False)
 
     def __init__(self, **kwargs):
         super(WaterLily, self).__init__(**kwargs)
@@ -216,7 +291,7 @@ class WaterLily(Widget):
                 # live lost, don't wait so long
                 reappear_after = 1
         # wait under water, then appear again
-        if self.auto_reappear:
+        if self.auto_reappear or reappear_after == 1:
             Clock.schedule_once(self.appear, reappear_after)
 
     def on_appeared(self):
@@ -249,11 +324,20 @@ class SwitchLily(WaterLily):
                 self.controlled.force_sinking()
 
     def on_controlled_change(self, instance, value):
+        """
+        Used to setup the controlled lily, but is not there to
+        change while the game is running
+        """
         self.controlled.auto_reappear = False
         self.controlled.static = True
+        self.controlled.bind(free=self.on_controlled_free_changed)
         if self.pressed:
             self.controlled.appear(None)
         else:
+            self.controlled.force_sinking()
+
+    def on_controlled_free_changed(self, instance, value):
+        if not self.pressed and value:
             self.controlled.force_sinking()
 
 
@@ -501,17 +585,57 @@ class MathWidget(Widget):
         self.initialized = True
         a = randint(*self.number_range)
         b = randint(*self.number_range)
+        if self.type == "random":
+            self.type = choice(["add", "subtract", "multiply", "divide"])
         if self.type == "add":
-            self.exercise = "{} + {}".format(a, b)
+            if b < 0:
+                to_format = "{} + ({})"
+            else:
+                to_format = "{} + {}"
+            self.exercise = to_format.format(a, b)
             c = a + b
             r = list(range(self.number_range[0] + self.number_range[0],
                            self.number_range[1] + self.number_range[1]))
         elif self.type == "subtract":
-            self.exercise = "{} - {}".format(a, b)
+            if b < 0:
+                to_format = "{} - ({})"
+            else:
+                to_format = "{} - {}"
+            self.exercise = to_format.format(a, b)
             c = a - b
             r = list(range(self.number_range[0] - self.number_range[1],
                            self.number_range[1] - self.number_range[0]))
             r.remove(c)
+        elif self.type == "multiply":
+            if b < 0:
+                to_format = "{} * ({})"
+            else:
+                to_format = "{} * {}"
+            self.exercise = to_format.format(a, b)
+            c = a * b
+            if self.number_range[0] < 0 and self.number_range[1] >= 0:
+                r = list(range(self.number_range[0] * self.number_range[1],
+                               max(abs(number_range[0]), number_range[1])**2))
+            elif self.number_range[0] < 0 and self.number_range[1] < 0:
+                r = list(range(self.number_range[1]**2,
+                               self.number_range[0]**2))
+            elif self.number_range[0] >= 0 and self.number_range[1] >= 0:
+                r = list(range(self.number_range[0]**2,
+                               self.number_range[1]**2))
+            r.remove(c)
+        else:
+            if b == 0:
+                b += 1
+            if b < 0:
+                to_format = "{} / ({})"
+            else:
+                to_format = "{} / {}"
+            self.exercise = to_format.format(a, b)
+            c = a / float(b)
+            r = [c]
+            add = randint(0, 4)
+            for i in range(self.count):
+                r.append((a + i + add) / float(b))
         self.lilys = [MoveableWaterLily()]
         self.lilys[0].text = c
         self.lilys[0].solution = c
@@ -551,10 +675,93 @@ class MathWidget(Widget):
 
 class GameScatter(Scatter):
     def on_transform_with_touch(self, touch):
-        if self.y > 0 or self.height < self.app.window.height:
+        if self.y > 0 or self.height * self.scale < self.app.window.height:
             self.y = 0
         elif self.top < self.app.window.height:
             self.top = self.app.window.height
+
+
+class SettingNumericRange(SettingItem):
+    '''Implementation of an numeric range on top of a :class:`SettingItem`.
+    It is visualized with a :class:`~kivy.uix.label.Label` widget that, when
+    clicked, will open a :class:`~kivy.uix.popup.Popup` with a
+    slider.
+    '''
+
+    min = NumericProperty(0)
+    max = NumericProperty(100)
+    round_to = NumericProperty(2)
+
+    popup = ObjectProperty(None, allownone=True)
+    '''(internal) Used to store the current popup when it is shown.
+
+    :attr:`popup` is an :class:`~kivy.properties.ObjectProperty` and defaults
+    to None.
+    '''
+    label = ObjectProperty(None)
+
+    def on_panel(self, instance, value):
+        if value is None:
+            return
+        self.bind(on_release=self._create_popup)
+
+    def on_value_change(self, instance, value):
+        self.value = round(float(value), self.round_to)
+        self.label.text = str(self.value)
+
+    def _create_popup(self, instance):
+        # create the popup
+        content = BoxLayout(orientation='vertical', spacing='5dp')
+        self.popup = popup = Popup(
+            content=content, title=self.title, size_hint=(None, None),
+            size=('400dp', '400dp'))
+        popup.height = dp(200)
+
+        # add all the options
+        slider = Slider(min=self.min, max=self.max, value=float(self.value))
+        slider.bind(value=self.on_value_change)
+        content.add_widget(slider)
+
+        # finally, add a cancel button to return on the previous panel
+        content.add_widget(SettingSpacer())
+        btn = Button(text='Ok', size_hint_y=None, height=dp(40))
+        btn.bind(on_release=popup.dismiss)
+        content.add_widget(btn)
+
+        # and open the popup !
+        popup.open()
+
+    def on_pos(self, instance, value):
+        if self.label is not None:
+            return
+        self.label = Label()
+        self.label.text = str(self.value)
+        self.content.add_widget(self.label)
+
+
+class SettingHalfOpenNumericRange(SettingNumeric):
+    limit = NumericProperty(0)
+    lower = BooleanProperty(False)
+
+    def _validate(self, instance):
+        # we know the type just by checking if there is a '.' in the original
+        # value
+        is_float = '.' in str(self.value)
+        self._dismiss()
+        try:
+            if is_float:
+                value = text_type(float(self.textinput.text))
+            else:
+                value = text_type(int(self.textinput.text))
+            if self.lower:
+                if value > self.limit:
+                    value = self.limit
+            else:
+                if value < self.limit:
+                    value = self.limit
+            self.value = value
+        except ValueError:
+            return
 
 
 if __name__ == '__main__':

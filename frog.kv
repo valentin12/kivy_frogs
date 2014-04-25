@@ -70,7 +70,7 @@
     size: dp(20), dp(70)
     speed: -1.5
     rot_change: random()
-    pos: randint(dp(40), app.window.width - dp(100)), randint(dp(40), app.window.height - dp(40))
+    pos: randint(dp(40), dp(400)), randint(dp(40), app.game.height - dp(40))
     
     Scatter:
         id: scatter
@@ -130,6 +130,8 @@
     free: True
     static: False
     auto_reappear: True
+    sinking: False
+    appearing: False
     Scatter:
         id: scatter
         do_rotation: False
@@ -173,7 +175,7 @@
     Label:
         id: label
         center: root.center
-        text: str(root.text)
+        text: str(round(root.text, 3)) if root.text and type(root.text) == float else str(root.text)
         font_size: dp(20)
 
 
@@ -215,16 +217,19 @@
     status: status
     energy_label: energy_label
     game_scatter: game_scatter
+    store: []
     lilys: []
     lily_provider: []
     frogs: []
     flys: []
+    boats: []
     player: self.player
     live_imgs: [live, live1, live2]
     lives: 3
     energy: self.energy
     running: True
-    objects: {"background": background, "start": start, "end": end, "game_scatter": game_scatter, "live": live, "live1": live1, "live2": live2, "status": status, "energy_label": energy_label}
+    standard_objects: {"background": background, "start": start, "end": end, "game_scatter": game_scatter, "live": live, "live1": live1, "live2": live2, "status": status, "energy_label": energy_label}
+    objects: {}
     Background:
         id: background
         source: "img/background_dark.png"

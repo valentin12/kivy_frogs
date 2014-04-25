@@ -1,5 +1,7 @@
 *.pyc
+*.pyo
 *~
 *.blend1
 *.blend2
+AndroidManifest.xml
 #*

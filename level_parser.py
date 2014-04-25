@@ -23,17 +23,33 @@ def parse_level(filepath):
     return level
 
 
-def build_level(filename, app):
-    print "build level\n---------------------------------------------"
+def build_level(filename, app, root):
     def calculate_point(pos, distance):
         x, y = [float(v) for v in pos]
         x *= distance
         y *= distance
         return x, y
 
+    # reset game to standard settings
+    root.game_scatter.before_jumpline.clear_widgets()
+    root.game_scatter.jumplines.clear_widgets()
+    root.game_scatter.after_jumplines.clear_widgets()
+    root.objects = {}
+    root.frogs = []
+    root.lilys = []
+    root.lily_provider = []
+    root.lives = 3
+    for i in range(root.lives):
+        root.live_imgs[i].source = root.live_imgs[i].alive_img
+    root.running = True
+    root.game_scatter.center_x = app.window.width / 2
+    root.game_scatter.y = 0
+    root.energy = 4
+    root.status.text = ""
+    root.start.free = True
+    root.end.free = True
+    # load level dict
     level = parse_level(filename)
-    root = GameWidget(app=app)
-    app.game = root
     # setup level specific things
     distance = dp(100)
     l = level["level"][0]
@@ -69,7 +85,6 @@ def build_level(filename, app):
         if "pos" in level["end"][0]:
             x, y = calculate_point(
                 level["end"][0]["pos"].split(","), distance)
-            print str(x) + " " + str(y)
             root.end.center_x = x
             root.end.y = y
         if "source" in level["end"][0]:
@@ -86,8 +101,6 @@ def build_level(filename, app):
                     lily["pos"].split(","), distance)
                 l.center_x = x
                 l.y = y
-            if "free" in lily:
-                l.free = lily["free"] == "True"
             root.game_scatter.before_jumpline.add_widget(l)
             root.lilys.append(l)
     if "stonelily" in level:
@@ -102,14 +115,19 @@ def build_level(filename, app):
                     lily["pos"].split(","), distance)
                 l.center_x = x
                 l.y = y
-            if "free" in lily:
-                l.free = lily["free"] == "True"
             root.game_scatter.before_jumpline.add_widget(l)
             root.lilys.append(l)
     # add math widget
     if "math" in level:
         for math in level["math"]:
             m = MathWidget(app=app, root=root)
+            min = int(float(app.config.getfloat(
+                "Math", "Min")))
+            max = int(float(app.config.getfloat(
+                "Math", "Max")))
+            m.number_range = (min, max)
+            m.type = app.config.get(
+                "Math", "TypeOfCalculation")
             if "id" in math:
                 m.id = math["id"]
                 if m.id not in root.objects:
@@ -133,21 +151,30 @@ def build_level(filename, app):
                     lily["pos"].split(","), distance)
                 l.center_x = x
                 l.y = y
-            if "free" in lily:
-                l.free = lily["free"] == "True"
             if "controlled" in lily:
-                l.controlled = root.objects[lily["controlled"]]
+                l.controlled = dict(root.objects.items() +
+                                    root.standard_objects.items()
+                                    )[lily["controlled"]]
             root.game_scatter.before_jumpline.add_widget(l)
             root.lilys.append(l)
     # add the flys
     for i in range(flys):
-        f = Fly(app=app, root=root)
-        root.flys.append(f)
+        try:
+            f = root.flys[i]
+        except IndexError:
+            f = Fly(app=app, root=root)
+            root.flys.append(f)
         root.game_scatter.before_jumpline.add_widget(f)
+    root.flys = root.flys[:flys]
     # add the boats
     for i in range(boats):
-        b = Boat(app=app, root=root)
+        try:
+            b = root.boats[i]
+        except IndexError:
+            b = Boat(app=app, root=root)
+            root.boats.append(b)
         root.game_scatter.before_jumpline.add_widget(b)
+    root.boats = root.boats[:boats]
     # and the frogs
     if "frog" in level:
         for frog in level["frog"]:
@@ -157,7 +184,10 @@ def build_level(filename, app):
                 if f.id not in root.objects:
                     root.objects[f.id] = f
             if "place" in frog:
-                f.place = root.objects[frog["place"]]
+                f.place = dict(root.objects.items() +
+                               root.standard_objects.items()
+                           )[frog["place"]]
+                f.place.free = False
                 f.center_x = f.place.center_x
                 f.center_y = f.place.center_y
             else:

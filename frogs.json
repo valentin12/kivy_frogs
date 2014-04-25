@@ -1,0 +1,48 @@
+[
+    { "type": "title",
+      "title": "General"},
+    
+    { "type": "numeric_range",
+      "title": "Background Volume",
+      "key": "Background",
+      "min": 0,
+      "max": 100,
+      "section": "General"},
+
+    { "type": "numeric_range",
+      "title": "Sound Volume",
+      "key": "Sound",
+      "min": 0,
+      "max": 100,
+      "section": "General"},
+
+    { "type": "numeric_range",
+      "title": "Zoom",
+      "key": "Zoom",
+      "min": 0.5,
+      "max": 1.1,
+      "section": "General"},
+
+
+    { "type": "title",
+      "title": "Math"},
+
+    { "type": "numeric",
+      "title": "Min",
+      "key": "Min",
+      "section": "Math",
+      "desc": "Lowest number used in Math exercises"},
+
+    { "type": "numeric",
+      "title": "Max",
+      "key": "Max",
+      "section": "Math",
+      "desc": "Highest number used in Math exercises"},
+
+    { "type": "options",
+      "title": "Type Of Calculation",
+      "key": "TypeOfCalculation",
+      "section": "Math",
+      "options": ["add", "subtract", "multiply", "divide", "random"],
+      "desc": "The type of calculation used in math exercises"}
+]
