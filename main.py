@@ -57,24 +57,23 @@ class FrogApp(App):
             "eat": SoundLoader.load("snd/eat.wav"),
             "sink": SoundLoader.load("snd/sink.wav"),
             "jump": SoundLoader.load("snd/jump.wav"),
-            "background": SoundLoader.load("snd/background.ogg"),
-            "no_energy": SoundLoader.load("snd/wrong.ogg"),
+            "background": SoundLoader.load("snd/short_background.wav"),
+            "no_energy": SoundLoader.load("snd/wrong.wav"),
             # sounds for IntervalWidget
-            "c1": SoundLoader.load("snd/c1.ogg"),
-            "d1": SoundLoader.load("snd/d1.ogg"),
-            "e1": SoundLoader.load("snd/e1.ogg"),
-            "f1": SoundLoader.load("snd/f1.ogg"),
-            "g1": SoundLoader.load("snd/g1.ogg"),
-            "a1": SoundLoader.load("snd/a1.ogg"),
-            "h1": SoundLoader.load("snd/h1.ogg"),
-            "c2": SoundLoader.load("snd/c2.ogg")
+            "c1": SoundLoader.load("snd/c1.wav"),
+            "d1": SoundLoader.load("snd/d1.wav"),
+            "e1": SoundLoader.load("snd/e1.wav"),
+            "f1": SoundLoader.load("snd/f1.wav"),
+            "g1": SoundLoader.load("snd/g1.wav"),
+            "a1": SoundLoader.load("snd/a1.wav"),
+            "h1": SoundLoader.load("snd/h1.wav"),
+            "c2": SoundLoader.load("snd/c2.wav")
         }
 
     def build(self):
         from kivy.base import EventLoop
         EventLoop.ensure_window()
         self.window = EventLoop.window
-        self.window.bind(on_resize=self.on_resize)
         self.game = GameWidget(app=self)
         self.game = level_parser.build_level(
             "levels/level_001.txt", self, self.game)
@@ -101,9 +100,6 @@ class FrogApp(App):
     def restart(self):
         level_parser.build_level(
             "levels/level_001.txt", self, self.game)
-
-    def on_resize(self, instance, width, height):
-        pass
 
     def build_config(self, config):
         config.adddefaultsection("General")
