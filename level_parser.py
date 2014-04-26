@@ -37,6 +37,8 @@ def build_level(filename, app, root):
     root.objects = {}
     root.frogs = []
     root.lilys = []
+    root.flys = []
+    root.boats = []
     root.lily_provider = []
     root.lives = 3
     for i in range(root.lives):
@@ -119,8 +121,14 @@ def build_level(filename, app, root):
             root.lilys.append(l)
     # add math widget
     if "math" in level:
-        for math in level["math"]:
-            m = MathWidget(app=app, root=root)
+        for i in range(len(level["math"])):
+            math = level["math"][i]
+            try:
+                m = [ma for ma in root.store
+                     if type(ma) == MathWidget][i]
+            except IndexError:
+                m = MathWidget(app=app, root=root)
+                root.store.append(m)
             min = int(float(app.config.getfloat(
                 "Math", "Min")))
             max = int(float(app.config.getfloat(
@@ -137,11 +145,29 @@ def build_level(filename, app, root):
                     math["pos"].split(","), distance)
                 m.center_x = x
                 m.y = y
+            if "count" in math:
+                m.count = int(math["count"])
+            else:
+                m.count = 5
+            if "speed" in math:
+                m.speed = float(math["speed"])
+            else:
+                m.speed = 1
+            if "orientation" in math:
+                m.orientation = math["orientation"]
+            else:
+                m.orientation = "horizontal"
+            m.setup(force=True)
             root.game_scatter.before_jumpline.add_widget(m)
             root.lily_provider.append(m)
     if "interval" in level:
-        for interval in level["interval"]:
-            i = IntervalWidget()
+        for i in range(len(level["interval"])):
+            interval = level["interval"][i]
+            try:
+                i = [iv for iv in root.store if type(iv) == IntervalWidget][i]
+            except IndexError:
+                i = IntervalWidget()
+                root.store.append(i)
             if "id" in interval:
                 i.id = interval["id"]
                 if i.id not in root.objects:
@@ -151,6 +177,19 @@ def build_level(filename, app, root):
                     interval["pos"].split(","), distance)
                 i.center_x = x
                 i.y = y
+            if "count" in interval:
+                i.count = int(interval["count"])
+            else:
+                i.count = 5
+            if "speed" in interval:
+                i.speed = float(interval["speed"])
+            else:
+                i.speed = 1
+            if "orientation" in interval:
+                i.orientation = interval["orientation"]
+            else:
+                i.orientation = "horizontal"
+            i.setup(force=True)
             root.game_scatter.before_jumpline.add_widget(i)
             root.lily_provider.append(i)
     if "switchlily" in level:
@@ -174,21 +213,21 @@ def build_level(filename, app, root):
     # add the flys
     for i in range(flys):
         try:
-            f = root.flys[i]
+            f =  [fly for fly in root.store if type(fly) == Fly][i]
         except IndexError:
             f = Fly(app=app, root=root)
-            root.flys.append(f)
+            root.store.append(f)
+        root.flys.append(f)
         root.game_scatter.before_jumpline.add_widget(f)
-    root.flys = root.flys[:flys]
     # add the boats
     for i in range(boats):
         try:
-            b = root.boats[i]
+            b = [boat for boat in root.store if type(boat) == Boat][i]
         except IndexError:
             b = Boat(app=app, root=root)
-            root.boats.append(b)
+            root.store.append(boat)
+        root.boats.append(b)
         root.game_scatter.before_jumpline.add_widget(b)
-    root.boats = root.boats[:boats]
     # and the frogs
     if "frog" in level:
         for frog in level["frog"]:

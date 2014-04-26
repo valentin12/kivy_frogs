@@ -184,6 +184,7 @@
     auto_reappear: False
     not_pressed_img: "img/lily_switch_not_pressed.png"
     pressed_img: "img/lily_switch_pressed.png"
+    controlled_img: "img/water_lily_controlled.png"
     pressed: not self.free
     source: self.pressed_img if self.pressed else self.not_pressed_img
     controlled: self.controlled
@@ -197,11 +198,14 @@
     speed: 1
     exercise: ""
     label: label
+    lily_widget: lily_widget
+    Widget:
+        id: lily_widget
     Label:
         id: label
         font_size: dp(25)
         text: str(root.exercise)
-        center_x: root.pos[0] + root.count / 2 * root.distance + root.distance / 2
+        center_x: root.pos[0] + root.distance / 2 if root.orientation == "vertical" else root.pos[0] + root.count / 2 * root.distance + root.distance / 2
         y: root.y - 2.5 * self.font_size
         halign: "center"
     

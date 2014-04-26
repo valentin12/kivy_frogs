@@ -58,6 +58,7 @@ class FrogApp(App):
             "sink": SoundLoader.load("snd/sink.wav"),
             "jump": SoundLoader.load("snd/jump.wav"),
             "background": SoundLoader.load("snd/background.ogg"),
+            "no_energy": SoundLoader.load("snd/wrong.ogg"),
             # sounds for IntervalWidget
             "c1": SoundLoader.load("snd/c1.ogg"),
             "d1": SoundLoader.load("snd/d1.ogg"),
@@ -339,6 +340,7 @@ class SwitchLily(WaterLily):
         """
         self.controlled.auto_reappear = False
         self.controlled.static = True
+        self.controlled.source = self.controlled_img
         self.controlled.bind(free=self.on_controlled_free_changed)
         if self.pressed:
             self.controlled.appear(None)
@@ -474,6 +476,9 @@ class Frog(Widget):
                 it.extend(p.lilys)
             # you can only jump - and die - if you have energy
             die = self.app.game.energy
+            if not self.app.game.energy and\
+               not self.place.collide_point(*end):
+                self.app.sounds["no_energy"].play()
             for lily in it:
                 collide = False
                 try:
@@ -586,7 +591,9 @@ class Frog(Widget):
 
 
 class ExerciseWidget(Widget):
-    def move(self):
+    lilys = []
+
+    def move(self, dt):
         for lily in self.lilys:
             if self.orientation == "horizontal":
                 lily.x += self.speed
@@ -612,11 +619,19 @@ class MathWidget(ExerciseWidget):
     initialized = False
 
     def on_pos(self, instance, pos):
-        if self.initialized:
+        self.setup()
+
+    def setup(self, force=False):
+        if self.initialized and not force:
             for i in range(len(self.lilys)):
                 self.lilys[i].pos = (self.pos[0] + i * self.distance,
                                      self.pos[1])
             return
+        else:
+            for lily in self.lilys:
+                self.lily_widget.remove_widget(lily)
+            self.lilys = []
+        print "initialize math"
         self.initialized = True
         a = randint(*self.number_range)
         b = randint(*self.number_range)
@@ -657,7 +672,12 @@ class MathWidget(ExerciseWidget):
             elif self.number_range[0] >= 0 and self.number_range[1] >= 0:
                 r = list(range(self.number_range[0]**2,
                                self.number_range[1]**2))
-            r.remove(c)
+            try:
+                r.remove(c)
+            except ValueError as e:
+                print e
+                print self.number_range
+                c
         else:
             if b == 0:
                 b += 1
@@ -685,10 +705,15 @@ class MathWidget(ExerciseWidget):
                     text=randint(*self.number_range), solution=c))
         shuffle(self.lilys)
         for i in range(len(self.lilys)):
-            self.add_widget(self.lilys[i])
-            self.lilys[i].pos = (self.pos[0] + i * self.distance,
-                                 self.pos[1])
-        Clock.schedule_interval(lambda dt: self.move(), 1 / 30)
+            self.lily_widget.add_widget(self.lilys[i])
+            if self.orientation == "horizontal":
+                self.lilys[i].pos = (self.pos[0] + i * self.distance,
+                                     self.pos[1])
+            else:
+                self.lilys[i].pos = (self.pos[0],
+                                     self.pos[1] + i * self.distance)
+        Clock.unschedule(self.move)
+        Clock.schedule_interval(self.move, 1 / 30)
 
 
 class IntervalWidget(ExerciseWidget):
@@ -713,11 +738,18 @@ class IntervalWidget(ExerciseWidget):
             self.play_sound()
 
     def on_pos(self, instance, pos):
-        if self.initialized:
+        self.setup()
+
+    def setup(self, force=False):
+        if self.initialized and not force:
             for i in range(len(self.lilys)):
                 self.lilys[i].pos = (self.pos[0] + i * self.distance,
                                      self.pos[1])
             return
+        else:
+            for lily in self.lilys:
+                self.lily_widget.remove_widget(lily)
+            self.lilys = []
         self.initialized = True
         self.solution = choice(self.intervals)
         # other posibilities
@@ -738,10 +770,16 @@ class IntervalWidget(ExerciseWidget):
                     solution=self.solution[1]))
         shuffle(self.lilys)
         for i in range(len(self.lilys)):
-            self.add_widget(self.lilys[i])
-            self.lilys[i].pos = (self.pos[0] + i * self.distance,
-                                 self.pos[1])
-        Clock.schedule_interval(lambda dt: self.move(), 1 / 30)
+            self.lily_widget.add_widget(self.lilys[i])
+            print self.orientation
+            if self.orientation == "horizontal":
+                self.lilys[i].pos = (self.pos[0] + i * self.distance,
+                                     self.pos[1])
+            else:
+                self.lilys[i].pos = (self.pos[0],
+                                     self.pos[1] + i * self.distance)
+        Clock.unschedule(self.move)
+        Clock.schedule_interval(self.move, 1 / 30)
 
     def play_sound(self):
         self.app.sounds["c1"].play()
