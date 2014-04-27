@@ -42,7 +42,8 @@
     size: dp(30), dp(30)
     speed: 1.5
     rot_change: random()
-    pos: randint(dp(40), app.window.width - dp(100)), randint(dp(40), app.window.height - dp(40))
+    x: 0 if int(dp(40)) >= int(app.window.width - dp(40)) else randint(int(dp(40)), int(app.window.width - dp(40)))
+    y: 0 if int(dp(40)) >= int(app.window.height - dp(40)) else randint(int(dp(40)), int(app.window.height - dp(40)))
     
     Scatter:
         id: scatter
@@ -70,7 +71,8 @@
     size: dp(20), dp(70)
     speed: -1.5
     rot_change: random()
-    pos: randint(dp(40), dp(400)), randint(dp(40), app.game.height - dp(40))
+    x: 0 if int(dp(40)) >= int(app.window.width - dp(40)) else randint(int(dp(40)), int(app.window.width - dp(40)))
+    y: 0 if int(dp(40)) >= int(app.window.height - dp(40)) else randint(int(dp(40)), int(app.window.height - dp(40)))
     
     Scatter:
         id: scatter
@@ -296,6 +298,21 @@
         id: live2
         top: app.window.height - dp(5)
         x: dp(90)
+
+    Button:
+        id: help_btn
+        top: live2.y - dp(10)
+        x: dp(10)
+        height: dp(40)
+        text: "Help"
+        on_touch_down: if self.collide_point(*args[1].pos): app.help_popup.open()
+
+    Button:
+        top: help_btn.y - dp(10)
+        x: dp(10)
+        height: dp(40)
+        text: "Settings"
+        on_touch_down: if self.collide_point(*args[1].pos): app.open_settings()
 
     Label:
         id: energy_label

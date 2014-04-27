@@ -10,6 +10,7 @@ from kivy.vector import Vector
 from kivy.animation import Animation
 from kivy.metrics import dp
 from kivy.clock import Clock
+Clock.max_iteration = 1
 from kivy.core.audio import SoundLoader
 from kivy.uix.settings import SettingNumeric, SettingItem, SettingSpacer
 from kivy.uix.boxlayout import BoxLayout
@@ -71,6 +72,7 @@ class FrogApp(App):
         }
 
     def build(self):
+        self.icon = "img/icon_blue_orange.png"
         from kivy.base import EventLoop
         EventLoop.ensure_window()
         self.window = EventLoop.window
@@ -95,6 +97,11 @@ class FrogApp(App):
         # add game to main widget that it gets displayed
         self.main = Widget(app=self, size=self.window.size)
         self.main.add_widget(self.game)
+        self.help_popup = Popup(title="Help",
+                                attach_to=self.game)
+        help_img = Image(source="img/help.png")
+        self.help_popup.content = help_img
+        self.help_popup.bind(on_touch_down=self.help_popup.dismiss)
         return self.main
 
     def restart(self):
@@ -104,7 +111,7 @@ class FrogApp(App):
     def build_config(self, config):
         config.adddefaultsection("General")
         config.setdefault("General", "Background", "50.0")
-        config.setdefault("General", "Sound", "100.0")
+        config.setdefault("General", "Sound", "50.0")
         config.setdefault("General", "Zoom", "1.0")
         config.setdefault("General", "First", "True")
 
@@ -200,8 +207,14 @@ class RandomMover(Widget):
 
     def restart(self):
         self.last_rotated = False
-        self.center = (randint(dp(40), self.app.game.width - dp(40)),
-                       randint(dp(40), self.app.game.height - dp(40)))
+        self.center = (0 if int(dp(40)) >= 
+                       int(self.app.game.width - dp(40)) else 
+                       randint(int(dp(40)),
+                               int(self.app.game.width - dp(40))),
+                       0 if int(dp(40)) >=
+                       int(self.app.game.height - dp(40)) else
+                       randint(int(dp(40)),
+                               int(self.app.game.height - dp(40))))
         self.scatter.rotation = randint(0, 360)
 
 
@@ -627,10 +640,11 @@ class MathWidget(ExerciseWidget):
             for lily in self.lilys:
                 self.lily_widget.remove_widget(lily)
             self.lilys = []
-        print "initialize math"
         self.initialized = True
-        a = randint(*self.number_range)
-        b = randint(*self.number_range)
+        a = randint(int(self.number_range[0]),
+                    int(self.number_range[1]))
+        b = randint(int(self.number_range[0]),
+                    int(self.number_range[1]))
         if self.type == "random":
             self.type = choice(["add", "subtract", "multiply", "divide"])
         if self.type == "add":
@@ -673,7 +687,7 @@ class MathWidget(ExerciseWidget):
             except ValueError as e:
                 print e
                 print self.number_range
-                c
+                print c
         else:
             if b == 0:
                 b += 1
@@ -767,7 +781,6 @@ class IntervalWidget(ExerciseWidget):
         shuffle(self.lilys)
         for i in range(len(self.lilys)):
             self.lily_widget.add_widget(self.lilys[i])
-            print self.orientation
             if self.orientation == "horizontal":
                 self.lilys[i].pos = (self.pos[0] + i * self.distance,
                                      self.pos[1])
