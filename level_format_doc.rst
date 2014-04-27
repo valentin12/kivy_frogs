@@ -3,6 +3,7 @@ Level Format for Frogs
 
 Basics
 ------
+All level files lay in the levels folder. they have to start with "level_" and must have the ending ".txt"
 A level file is a simple text file. In every line is an game object defined and you can make a reference to it by an id. The order doesn't matter.
 Positions are defined in a table with row,column.
 Every id should exist only one time. Some objects exist in every level and they have the following ids and functions:

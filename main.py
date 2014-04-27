@@ -10,10 +10,11 @@ from kivy.vector import Vector
 from kivy.animation import Animation
 from kivy.metrics import dp
 from kivy.clock import Clock
-Clock.max_iteration = 1
+Clock.max_iteration = 20
 from kivy.core.audio import SoundLoader
 from kivy.uix.settings import SettingNumeric, SettingItem, SettingSpacer
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.popup import Popup
 from kivy.uix.slider import Slider
 from kivy.uix.button import Button
@@ -73,12 +74,14 @@ class FrogApp(App):
 
     def build(self):
         self.icon = "img/icon_blue_orange.png"
+        self.levels = level_parser.find_levels()
+        self.level = 0
         from kivy.base import EventLoop
         EventLoop.ensure_window()
         self.window = EventLoop.window
         self.game = GameWidget(app=self)
         self.game = level_parser.build_level(
-            "levels/level_001.txt", self, self.game)
+            self.levels[self.level], self, self.game)
         # setup scatter scale. I wanted to allow translation and scale,
         # but the user was able to rotate then too and so I left the scale
         # and made it to a setting
@@ -97,16 +100,48 @@ class FrogApp(App):
         # add game to main widget that it gets displayed
         self.main = Widget(app=self, size=self.window.size)
         self.main.add_widget(self.game)
+        # popup to display help
         self.help_popup = Popup(title="Help",
                                 attach_to=self.game)
         help_img = Image(source="img/help.png")
         self.help_popup.content = help_img
         self.help_popup.bind(on_touch_down=self.help_popup.dismiss)
+        # popup to choose a level
+        grid = GridLayout(rows=5, cols=5)
+        i = 1
+        for level in self.levels:
+            btn = Button(text=str(i), font_size=dp(25))
+            btn.bind(on_press=self.load_level)
+            grid.add_widget(btn)
+            i += 1
+        self.level_popup = Popup(title="Choose a level",
+                                 content=grid,
+                                 size_hint=(.5, .5))
         return self.main
 
     def restart(self):
         level_parser.build_level(
-            "levels/level_001.txt", self, self.game)
+            self.levels[self.level], self, self.game)
+
+    def next_level(self):
+        try:
+            self.level += 1
+            level_parser.build_level(
+                self.levels[self.level], self, self.game)
+        except IndexError:
+            self.level = 0
+            level_parser.build_level(
+                self.levels[self.level], self, self.game)
+
+    def load_level(self, level):
+        print "Load level " + str(level)
+        if not type(level) == int:
+            self.level = int(level.text) - 1
+            self.level_popup.dismiss()
+        else:
+            self.level = level
+        level_parser.build_level(
+            self.levels[self.level], self, self.game)
 
     def build_config(self, config):
         config.adddefaultsection("General")
@@ -170,7 +205,7 @@ class GameWidget(Widget):
         self.running = False
         self.app.game.status.text = "Won"
         self.app.sounds["won"].play()
-        Clock.schedule_once(lambda dt: self.app.restart(), 5)
+        Clock.schedule_once(lambda dt: self.app.next_level(), 2)
 
 
 class Background(Image):
@@ -280,6 +315,8 @@ class WaterLily(Widget):
     def start_sinking(self, dt):
         if not self.free and not self.static:
             if not self.sinking and not self.appearing:
+                print self.free
+                print "sinking"
                 self.sinking = True
                 self.sinking_anim.start(self.scatter)
 
@@ -555,8 +592,9 @@ class Frog(Widget):
             self.app.game.game_scatter.jumplines.remove_widget(
                 self.jumpline)
             self.jumpline = None
+        if self.alive:
+            self.app.game.decrement_lives()
         self.alive = False
-        self.app.game.decrement_lives()
         self.anim_running = True
         self.die_anim.start(self.scatter)
 

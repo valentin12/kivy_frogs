@@ -2,6 +2,16 @@ from kivy.uix.widget import Widget
 from main import GameWidget, WaterLily, StoneLily,\
     MathWidget, Frog, JumpLine, Fly, Boat, SwitchLily, IntervalWidget
 from kivy.metrics import dp
+from os import listdir, getcwd
+
+
+def find_levels():
+    levels = []
+    for file in listdir("levels"):
+        if file.startswith("level_") and file.endswith(".txt"):
+            levels.append("levels/" + file)
+    levels.sort()
+    return levels
 
 
 def parse_level(filepath):
@@ -103,6 +113,7 @@ def build_level(filename, app, root):
                     lily["pos"].split(","), distance)
                 l.center_x = x
                 l.y = y
+            l.free = True
             root.game_scatter.before_jumpline.add_widget(l)
             root.lilys.append(l)
     if "stonelily" in level:
