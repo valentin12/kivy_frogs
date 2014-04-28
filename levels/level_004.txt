@@ -1,0 +1,12 @@
+level size=6,8
+start pos=3,0
+end pos=3,7
+waterlily pos=3,1 id=lily_001
+interval pos=3,2 orientation=vertical count=3
+waterlily pos=3,6 id=lily_004
+waterlily pos=5,6 id=lily_002
+switchlily pos=6,6 controlled=lily_004
+switchlily pos=4,4 controlled=lily_002 id=lily_003
+switchlily pos=4,5 controlled=lily_001
+frog place=start player=True sit_img=img/frog_black_blue_sit.png jump_img=img/frog_black_blue_jump.png
+frog sit_img=img/frog_green_sit.png jump_img=img/frog_green_jump.png place=lily_003
