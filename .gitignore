@@ -6,3 +6,4 @@
 AndroidManifest.xml
 #*
 *.ini
+levels/custom_level*

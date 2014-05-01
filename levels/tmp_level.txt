@@ -1,0 +1,8 @@
+level boats=0 flys=4 size=5,4
+stonelily pos=3,2 id=object_2
+waterlily pos=4,2 id=object_1
+stonelily pos=4,1 id=object_0
+end pos=4,3 id=end
+start pos=4,0 id=start
+frog id=player jump_img=img/frog_black_blue_jump.png sit_img=img/frog_black_blue_sit.png player=True place=start
+frog jump_img=img/frog_green_jump.png sit_img=img/frog_green_sit.png place=object_0

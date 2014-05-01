@@ -1,4 +1,4 @@
-level size=6,8
+level size=7,8
 start pos=3,0
 end pos=3,7
 waterlily pos=3,1 id=lily_001

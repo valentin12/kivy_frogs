@@ -14,6 +14,15 @@ def find_levels():
     return levels
 
 
+def find_custom_levels():
+    levels = []
+    for file in listdir("levels"):
+        if file.startswith("custom_level_") and file.endswith(".txt"):
+            levels.append("levels/" + file)
+    levels.sort()
+    return levels
+
+
 def parse_level(filepath):
     f = open(filepath)
     text = f.read()
@@ -48,6 +57,8 @@ def build_level(filename, app, root):
     root.frogs = []
     root.lilys = []
     root.flys = []
+    for boat in root.boats:
+        boat.active = False
     root.boats = []
     root.lily_provider = []
     root.lives = 3
@@ -224,7 +235,7 @@ def build_level(filename, app, root):
     # add the flys
     for i in range(flys):
         try:
-            f =  [fly for fly in root.store if type(fly) == Fly][i]
+            f = [fly for fly in root.store if type(fly) == Fly][i]
         except IndexError:
             f = Fly(app=app, root=root)
             root.store.append(f)
@@ -234,6 +245,7 @@ def build_level(filename, app, root):
     for i in range(boats):
         try:
             b = [boat for boat in root.store if type(boat) == Boat][i]
+            b.active = True
         except IndexError:
             b = Boat(app=app, root=root)
             root.store.append(boat)

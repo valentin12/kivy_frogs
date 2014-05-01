@@ -12,9 +12,11 @@ from kivy.metrics import dp
 from kivy.clock import Clock
 Clock.max_iteration = 20
 from kivy.core.audio import SoundLoader
-from kivy.uix.settings import SettingNumeric, SettingItem, SettingSpacer
+from kivy.uix.settings import SettingNumeric,\
+    SettingItem, SettingSpacer
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.popup import Popup
 from kivy.uix.slider import Slider
 from kivy.uix.button import Button
@@ -29,6 +31,7 @@ from random import choice
 from random import shuffle
 
 import level_parser
+from level_editor import LevelEditorWidget
 
 
 def only_running():
@@ -75,6 +78,7 @@ class FrogApp(App):
     def build(self):
         self.icon = "img/icon_blue_orange.png"
         self.levels = level_parser.find_levels()
+        self.custom_levels = level_parser.find_custom_levels()
         self.level = 0
         from kivy.base import EventLoop
         EventLoop.ensure_window()
@@ -82,6 +86,8 @@ class FrogApp(App):
         self.game = GameWidget(app=self)
         self.game = level_parser.build_level(
             self.levels[self.level], self, self.game)
+        self.current_level = self.levels[self.level]
+        self.repeat_level = False
         # setup scatter scale. I wanted to allow translation and scale,
         # but the user was able to rotate then too and so I left the scale
         # and made it to a setting
@@ -107,34 +113,58 @@ class FrogApp(App):
         self.help_popup.content = help_img
         self.help_popup.bind(on_touch_down=self.help_popup.dismiss)
         # popup to choose a level
-        grid = GridLayout(rows=5, cols=5)
+        l = LevelChooserPopup()
         i = 1
         for level in self.levels:
             btn = Button(text=str(i), font_size=dp(25))
             btn.bind(on_press=self.load_level)
-            grid.add_widget(btn)
+            l.levels.add_widget(btn)
+            i += 1
+        i = 1
+        for level in self.custom_levels:
+            btn = Button(text=str(i), font_size=dp(25))
+            btn.bind(on_press=self.load_custom_level)
+            btn.path = level
+            l.custom_levels.add_widget(btn)
             i += 1
         self.level_popup = Popup(title="Choose a level",
-                                 content=grid,
+                                 content=l,
                                  size_hint=(.5, .5))
+        # level editor
+        self.editor = LevelEditorWidget(app=self)
         return self.main
 
     def restart(self):
         level_parser.build_level(
-            self.levels[self.level], self, self.game)
+            self.current_level, self, self.game)
 
     def next_level(self):
-        try:
-            self.level += 1
-            level_parser.build_level(
-                self.levels[self.level], self, self.game)
-        except IndexError:
-            self.level = 0
-            level_parser.build_level(
-                self.levels[self.level], self, self.game)
+        if not self.repeat_level:
+            if self.current_level in self.levels:
+                try:
+                    self.level += 1
+                    level_parser.build_level(
+                        self.levels[self.level], self, self.game)
+                except IndexError:
+                    self.level = 0
+                    level_parser.build_level(
+                        self.levels[self.level], self, self.game)
+                self.current_level = self.levels[self.level]
+            elif self.current_level in self.custom_levels:
+                try:
+                    self.current_level = self.custom_levels[
+                        self.custom_levels.index(
+                            self.current_level) + 1]
+                except IndexError:
+                    self.current_level = self.custom_levels[0]
+                level_parser.build_level(
+                    self.current_level, self, self.game)
+            else:
+                self.restart()
+        else:
+            self.restart()
 
     def load_level(self, level):
-        print "Load level " + str(level)
         if not type(level) == int:
             self.level = int(level.text) - 1
             self.level_popup.dismiss()
@@ -142,6 +172,15 @@ class FrogApp(App):
             self.level = level
         level_parser.build_level(
             self.levels[self.level], self, self.game)
+        self.current_level = self.levels[self.level]
+        self.repeat_level = False
+
+    def load_custom_level(self, path):
+        if not type(path) == str:
+            path = path.path
+            self.level_popup.dismiss()
+        self.current_level = path
+        level_parser.build_level(path, self, self.game)
 
     def build_config(self, config):
         config.adddefaultsection("General")
@@ -158,8 +197,6 @@ class FrogApp(App):
 
     def build_settings(self, settings):
         settings.register_type("numeric_range", SettingNumericRange)
-        settings.register_type("half_open_numeric_range",
-                               SettingHalfOpenNumericRange)
         settings.add_json_panel("Frog Settings",
                                 self.config, filename="frogs.json")
         self.settings = settings
@@ -183,6 +220,16 @@ class FrogApp(App):
                 config.set("Math", "Max", str(
                     int(config.getint("Math", "Min")) + 10))
                 config.write()
+
+    def open_level_editor(self):
+        self.main.remove_widget(self.game)
+        self.game.running = False
+        self.main.add_widget(self.editor)
+
+    def close_level_editor(self):
+        self.main.remove_widget(self.editor)
+        self.main.add_widget(self.game)
+        self.game.running = True
 
 
 class GameWidget(Widget):
@@ -242,8 +289,8 @@ class RandomMover(Widget):
 
     def restart(self):
         self.last_rotated = False
-        self.center = (0 if int(dp(40)) >= 
-                       int(self.app.game.width - dp(40)) else 
+        self.center = (0 if int(dp(40)) >=
+                       int(self.app.game.width - dp(40)) else
                        randint(int(dp(40)),
                                int(self.app.game.width - dp(40))),
                        0 if int(dp(40)) >=
@@ -270,7 +317,8 @@ class Fly(RandomMover):
 class Boat(RandomMover):
     def move(self):
         super(Boat, self).move()
-        self.check_collision()
+        if self.active:
+            self.check_collision()
 
     def check_collision(self):
         for lily in self.app.game.lilys:
@@ -315,8 +363,6 @@ class WaterLily(Widget):
     def start_sinking(self, dt):
         if not self.free and not self.static:
             if not self.sinking and not self.appearing:
-                print self.free
-                print "sinking"
                 self.sinking = True
                 self.sinking_anim.start(self.scatter)
 
@@ -400,6 +446,7 @@ class SwitchLily(WaterLily):
 
 class JumpLine(Widget):
     raw_end = (0, 0)
+
     @only_running()
     def set(self, point1, point2):
         """Set start and end point of the Line"""
@@ -901,29 +948,8 @@ class SettingNumericRange(SettingItem):
         self.content.add_widget(self.label)
 
 
-class SettingHalfOpenNumericRange(SettingNumeric):
-    limit = NumericProperty(0)
-    lower = BooleanProperty(False)
-
-    def _validate(self, instance):
-        # we know the type just by checking if there is a '.' in the original
-        # value
-        is_float = '.' in str(self.value)
-        self._dismiss()
-        try:
-            if is_float:
-                value = text_type(float(self.textinput.text))
-            else:
-                value = text_type(int(self.textinput.text))
-            if self.lower:
-                if value > self.limit:
-                    value = self.limit
-            else:
-                if value < self.limit:
-                    value = self.limit
-            self.value = value
-        except ValueError:
-            return
+class LevelChooserPopup(Widget):
+    pass
 
 
 if __name__ == '__main__':

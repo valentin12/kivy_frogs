@@ -19,6 +19,33 @@
     size: dp(30), sp(50)
     source: self.alive_img
 
+<LevelChooserPopup>
+    levels: levels
+    custom_levels: custom_levels
+    GridLayout:
+        id: levels
+        size_hint: 1, .45
+        y: root.y + root.height * .55
+        x: root.x
+        cols: 5
+        rows: 5
+        width: root.width
+    Label:
+        text: "Custom Levels"
+        y: custom_levels.top
+        x: root.x
+        height: dp(25)
+        width: root.width
+    GridLayout:
+        id: custom_levels
+        size_hint: 1, .45
+        y: root.y
+        x: root.x
+        cols: 5
+        rows: 5
+        width: root.width
+        
+
 # line to draw jump distance
 <JumpLine>
     x1: 0
@@ -70,6 +97,7 @@
     size_hint: None, None
     size: dp(20), dp(70)
     speed: -1.5
+    active: True
     rot_change: random()
     x: 0 if int(dp(40)) >= int(app.window.width - dp(40)) else randint(int(dp(40)), int(app.window.width - dp(40)))
     y: 0 if int(dp(40)) >= int(app.window.height - dp(40)) else randint(int(dp(40)), int(app.window.height - dp(40)))
@@ -226,6 +254,7 @@
     app: app
     id: game
     preferred_size: dp(600), dp(700)
+    size: app.window.size
     center_x: app.window.width / 2
     y: 0
     background: background
@@ -249,7 +278,7 @@
     objects: {}
     Background:
         id: background
-        source: "img/background_dark.png"
+        source: "img/background_blue.png"
     GameScatter:
         app: app
         id: game_scatter
@@ -305,7 +334,7 @@
         x: dp(10)
         height: dp(40)
         text: "Help"
-        on_touch_down: if self.collide_point(*args[1].pos): app.help_popup.open()
+        on_press: app.help_popup.open()
 
     Button:
         id: level_btn
@@ -313,14 +342,22 @@
         x: dp(10)
         height: dp(40)
         text: "Level"
-        on_touch_down: if self.collide_point(*args[1].pos): app.level_popup.open()
+        on_press: app.level_popup.open()
 
     Button:
+        id: settings_btn
         top: level_btn.y - dp(10)
         x: dp(10)
         height: dp(40)
         text: "Settings"
-        on_touch_down: if self.collide_point(*args[1].pos): app.open_settings()
+        on_press: app.open_settings()
+
+    Button:
+        top: settings_btn.y - dp(10)
+        x: dp(10)
+        height: dp(40)
+        text: "Level Editor"
+        on_press: app.open_level_editor()
 
     Label:
         id: energy_label
