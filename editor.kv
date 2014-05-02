@@ -26,9 +26,143 @@
         StoneLilyPH:
             pos: (dp(60) + root.offset, 0)
     Widget:
-        pos: dp(120) + 2 * root.offset, 0
+        pos: (dp(120) + 2 * root.offset, 0)
+        SwitchLilyPH:
+            pos: (dp(120) + 2 * root.offset, 0)
+    Widget:
+        pos: dp(180) + 3 * root.offset, 0
         FrogPH:
-            pos: dp(120) + 2 * root.offset, 0
+            pos: dp(180) + 3 * root.offset, 0
+
+
+<DividingLine@Widget>
+    height: dp(10)
+    canvas:
+        Color:
+            rgba: .8, .8, .8, .8
+        Line:
+            points: [root.pos[0], root.pos[1], root.pos[0] + root.width, root.pos[1]]
+            width: 1.5
+            cap: "none"
+
+
+<NumericInput>
+    multiline: False
+
+
+<SideBar>
+    offset: dp(2)
+    level_settings: level_settings
+    object_content: object_content
+    canvas:
+        Color:
+            rgba: .5, .5, .5, .5
+        Rectangle:
+            pos: root.pos
+            size: root.size
+    Button:
+        center_x: root.center_x
+        top: root.top
+        id: close
+        text: "Close"
+        height: dp(40)
+        width: root.width - dp(20)
+        on_press: app.repeat_level = False; app.close_level_editor()
+    Button:
+        id: export
+        center_x: root.center_x
+        top: close.y - root.offset
+        text: "Export"
+        height: dp(40)
+        width: root.width - dp(20)
+        on_press: app.editor.export_level(root.next_level_name())
+    Button:
+        id: clear
+        center_x: root.center_x
+        top: export.y - root.offset
+        text: "Clear"
+        height: dp(40)
+        width: root.width - dp(20)
+        on_press: app.editor.level.build_standard()
+    Button:
+        id: test
+        center_x: root.center_x
+        top: clear.y - root.offset
+        text: "Test it"
+        height: dp(40)
+        width: root.width - dp(20)
+        on_press: app.repeat_level=True; app.editor.export_level("levels/tmp_level.txt"); app.load_custom_level("levels/tmp_level.txt"); app.close_level_editor()
+    DividingLine:
+        id: div_line_001
+        pos: root.x, test.y - root.offset / 2
+        width: root.width
+    Widget:
+        id: level_settings
+        pos: root.x, div_line_001.y - root.offset / 2
+        width: root.width
+        flys_count: flys_count
+        boats_count: boats_count
+        energy_count: energy_count
+        Label:
+            id: level_label
+            text: "Level"
+            font_size: dp(25)
+            height: self.font_size
+            pos: root.x, div_line_001.y - root.offset - self.height
+        Label:
+            id: flys_label
+            text: "Flys"
+            height: self.font_size
+            x: root.x
+            top: level_label.y - root.offset
+        NumericInput:
+            id: flys_count
+            right: root.right
+            top: flys_label.y - root.offset
+            width: root.width
+            text: "4"
+            height: self.font_size * 2
+        Label:
+            id: boats_label
+            text: "Boats"
+            height: self.font_size
+            x: root.x
+            top: flys_count.y - root.offset
+        NumericInput:
+            id: boats_count
+            right: root.right
+            top: boats_label.y - root.offset
+            width: root.width
+            text: "1"
+            height: self.font_size * 2
+        Label:
+            id: energy_label
+            text: "Start Energy"
+            height: self.font_size
+            x: root.x
+            top: boats_count.y - root.offset
+        NumericInput:
+            id: energy_count
+            right: root.right
+            top: energy_label.y - root.offset
+            width: root.width
+            text: "4"
+            height: self.font_size * 2
+    DividingLine:
+        id: div_line_002
+        pos: root.x, energy_count.y - root.offset / 2
+        width: root.width
+    Label:
+        id: object_label
+        text: "Object"
+        font_size: dp(25)
+        height: self.font_size
+        pos: root.x, div_line_002.y - root.offset - self.height
+    Widget:
+        id: object_content
+        pos: root.x, object_label.y - root.offset - self.height
+        width: root.width
+        on_pos: for child in self.children: child.x = root.x
 
 
 <PHScatter>
@@ -55,6 +189,37 @@
     source: "img/water_lily_stone.png"
 
 
+<SelectButton>
+    app: app
+    selecting: False
+    selected: None
+    ignore: []
+
+
+<SwitchLilyOptions>
+    controlled: select_btn.selected
+    last_controlled: None
+    controlled_img: "img/water_lily_controlled.png"
+    obj: self.obj
+    SelectButton:
+        id: select_btn
+        height: dp(40)
+        width: root.width - dp(20)
+        x: root.x + dp(10)
+        top: root.top
+        ignore: [root.obj]
+        text: "Pick controlled"
+    Label:
+        width: root.width
+        height: self.font_size
+        top: select_btn.y
+        x: root.x
+        text: "Controlled: " if not root.controlled else "Controlled: " + root.controlled.id
+
+<SwitchLilyPH>
+    source: "img/lily_switch_not_pressed.png"
+
+
 <BasePH>
     size: dp(200), dp(100)
 
@@ -66,6 +231,7 @@
     size: dp(35), dp(75)
     place: None
     player: False
+    auto_bring_to_front: True
 
 
 <StartPH>
@@ -106,6 +272,8 @@
     level: level
     delete: delete
     object_count: 0
+    sidebar: sidebar
+    select: select
     BackgroundPH:
         id: background
         source: "img/background_blue.png"
@@ -123,10 +291,28 @@
                 Line:
                     width: 1
                     points: self.calculate_line_points()
+    Widget:
+        id: select
+        size: dp(30), dp(30)
+        pos: -400, -400
+        canvas:
+            Color:
+                rgba: 1, 0, 0, .8
+            Line:
+                width: 1.5
+                points: [select.x, select.center_y, select.right, select.center_y]
+            Line:
+                width: 1.5
+                points: [select.center_x, select.top, select.center_x, select.y]
     ToolBar:
         id: toolbar
         height: dp(65)
         width: root.width
+    SideBar:
+        id: sidebar
+        width: dp(150)
+        height: root.height
+        right: root.right
     Widget:
         id: delete
         size: dp(80), dp(80)
@@ -138,31 +324,3 @@
             Rectangle:
                 size: dp(80), dp(80)
                 pos: 0, root.height - dp(80)
-    Button:
-        right: root.right
-        top: root.top
-        id: close
-        text: "Close"
-        height: dp(40)
-        on_press: app.repeat_level = False; app.close_level_editor()
-    Button:
-        id: export
-        right: root.right
-        top: close.y - dp(10)
-        text: "Export"
-        height: dp(40)
-        on_press: root.export_level(root.next_level_name())
-    Button:
-        id: clear
-        right: root.right
-        top: export.y - dp(10)
-        text: "Clear"
-        height: dp(40)
-        on_press: app.editor.level.build_standard()
-    Button:
-        id: test
-        right: root.right
-        top: clear.y - dp(10)
-        text: "Test it"
-        height: dp(40)
-        on_press: app.repeat_level=True; root.export_level("levels/tmp_level.txt"); app.load_custom_level("levels/tmp_level.txt"); app.close_level_editor()
