@@ -7,3 +7,4 @@ AndroidManifest.xml
 #*
 *.ini
 levels/custom_level*
+levels/tmp_level.txt

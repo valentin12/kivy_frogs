@@ -6,7 +6,8 @@ from kivy.uix.image import Image
 from kivy.uix.scatterlayout import ScatterLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, NumericProperty,\
+    OptionProperty, StringProperty
 from os.path import isfile
 
 from kivy.lang import Builder
@@ -46,6 +47,10 @@ class LevelEditorWidget(Widget):
                         c.options.controlled.id)
                 else:
                     tp = "stonelily"
+            elif type(c) == ExercisePH:
+                tp = c.options.tp.lower()
+                extra_opts += "count={} orientation={} ".format(
+                    c.options.count, c.options.orientation.lower())
             elif type(c) == StartPH:
                 tp = "start"
             elif type(c) == EndPH:
@@ -115,7 +120,8 @@ class LevelScatter(Scatter):
         """Override to set object ids"""
         if type(widget) in [WaterLilyPH,
                             StoneLilyPH,
-                            SwitchLilyPH]:
+                            SwitchLilyPH,
+                            ExercisePH]:
             widget.id = "object_%03d" %\
                 self.app.editor.object_count
             self.app.editor.object_count += 1
@@ -154,19 +160,27 @@ class PHScatter(Scatter):
 
     def on_transform_with_touch(self, touch):
         self.current_touch = touch
-        self.app.editor.select.center = self.center
+        self.app.editor.select.center = self.to_window(*self.center)
         if not self.moved:
             self.parent.add_widget(type(self)(pos=self.parent.pos))
             self.moved = True
+            self.on_first_move()
             self.parent.remove_widget(self)
             self.app.editor.level.add_widget(self)
             self.center_x = touch.pos[0]
             self.center_y = touch.pos[1]
 
+    def on_first_move(self):
+        """
+        Method to overwrite. Executed if the PH is dropped out
+        of the toolbar
+        """
+        pass
+
     def on_touch_down(self, touch):
         if not self.collide_point(*touch.pos):
             return super(PHScatter, self).on_touch_down(touch)
-        self.app.editor.select.center = self.center
+        self.app.editor.select.center = self.to_window(*self.center)
         if not self.app.editor.sidebar.object_content.children\
            == [self.options]:
             self.app.editor.sidebar.object_content.clear_widgets()
@@ -208,7 +222,8 @@ class PHScatter(Scatter):
                     LOOP = False
             self.center_x = center_x
             self.y = y
-            self.app.editor.select.center = self.center
+            self.app.editor.select.center = self.to_window(
+                *self.center)
             return True
         return super(PHScatter, self).on_touch_up(touch)
 
@@ -216,6 +231,66 @@ class PHScatter(Scatter):
 class WaterLilyPH(PHScatter):
     """Waterlily placeholder for the level editor"""
     pass
+
+
+class ExerciseOptions(Widget):
+    obj = ObjectProperty(None, allownone=True)
+    count = NumericProperty(5)
+    tp = StringProperty("math")
+    orientation = OptionProperty("horizontal", options=[
+        "horizontal", "vertical"])
+
+    def __init__(self, **kwargs):
+        super(ExerciseOptions, self).__init__(**kwargs)
+        self.bind(count=self.on_count_change)
+        self.bind(orientation=self.on_orientation_change)
+
+    def on_count_change(self, instance, value):
+        self.obj.count = value
+
+    def on_orientation_change(self, instance, value):
+        print "changed orientation to: " + value
+        self.obj.orientation = value
+
+
+class ExercisePH(PHScatter):
+    """Placeholder for an exercise"""
+    option_type = ExerciseOptions
+    count = NumericProperty(5)
+    orientation = OptionProperty("horizontal", options=[
+        "horizontal", "vertical"])
+
+    def __init__(self, **kwargs):
+        super(ExercisePH, self).__init__(**kwargs)
+        self.bind(count=self.on_count_change)
+        self.bind(orientation=self.on_orient_change)
+
+    def on_first_move(self):
+        self.line_points = self.real_points
+        self.exercise_text = "Exercise: ..."
+
+    def on_count_change(self, instance, value):
+        print "ExercisePH: changed count to " + str(value)
+        self.recalculate_real_points()
+
+    def recalculate_real_points(self):
+        if self.orientation == "horizontal":
+            self.real_points = [
+                0 + dp(30),
+                self.height / 2,
+                self.count * (self.distance) + dp(30),
+                self.height / 2]
+        else:
+            self.real_points = [
+                self.width / 2,
+                dp(30),
+                self.width / 2,
+                self.count * (self.distance) + dp(30)]
+        self.line_points = self.real_points
+
+    def on_orient_change(self, instance, value):
+        print "ExercisePH: changed orientation to " + str(value)
+        self.recalculate_real_points()
 
 
 class StoneLilyPH(PHScatter):
@@ -290,8 +365,6 @@ class FrogPH(PHScatter):
             y = int(round(self.y / dp(100), 0))
             center_x = dp(100) * x
             y = dp(100) * y
-            # Loop until a free place was found
-            LOOP = True
             for child in self.parent.children:
                 if child.center_x == center_x and\
                    y == child.y and child != self and\
@@ -304,6 +377,8 @@ class FrogPH(PHScatter):
                     else:
                         child.bind(pos=self.on_parent_pos)
                         self.center = child.center
+                        self.app.editor.select.center = self.to_window(
+                            *self.center)
                         self.place = child.id
                         break
             else:
@@ -355,4 +430,3 @@ class SelectButton(Button):
                     return True
             self.selected = None
         return super(SelectButton, self).on_touch_up(touch)
-

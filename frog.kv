@@ -228,6 +228,7 @@
     speed: 1
     exercise: ""
     label: label
+    label_width: dp(200)
     lily_widget: lily_widget
     Widget:
         id: lily_widget
@@ -235,10 +236,11 @@
         id: label
         font_size: dp(25)
         text: str(root.exercise)
+        width: root.label_width
         center_x: root.pos[0] + root.distance / 2 if root.orientation == "vertical" else root.pos[0] + root.count / 2 * root.distance + root.distance / 2
         y: root.y - 2.5 * self.font_size
         halign: "center"
-    
+
 
 <MathWidget>
     app: app
@@ -248,6 +250,7 @@
 
 <IntervalWidget>
     exercise: "Which interval is it? Play"
+    label_width: dp(300)
     
 
 <GameWidget>

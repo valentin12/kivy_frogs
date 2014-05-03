@@ -22,17 +22,21 @@
         WaterLilyPH:
             pos: 0, 0
     Widget:
-        pos: (dp(60) + root.offset, 0)
+        pos: (1 * dp(60) + root.offset, 0)
         StoneLilyPH:
-            pos: (dp(60) + root.offset, 0)
+            pos: (1 * dp(60) + root.offset, 0)
     Widget:
-        pos: (dp(120) + 2 * root.offset, 0)
+        pos: (2 * dp(60) + 2 * root.offset, 0)
         SwitchLilyPH:
-            pos: (dp(120) + 2 * root.offset, 0)
+            pos: (2 * dp(60) + 2 * root.offset, 0)
     Widget:
-        pos: dp(180) + 3 * root.offset, 0
+        pos: (3 * dp(60) + 3 * root.offset, 0)
+        ExercisePH:
+            pos: (3 * dp(60) + 3 * root.offset, 0)
+    Widget:
+        pos: (4 * dp(60) + 4 * root.offset, 0)
         FrogPH:
-            pos: dp(180) + 3 * root.offset, 0
+            pos: (4 * dp(60) + 4 * root.offset, 0)
 
 
 <DividingLine@Widget>
@@ -174,7 +178,9 @@
     auto_bring_to_front: False
     moved: False
     source: self.source
+    img: img
     Image:
+        id: img
         size: root.size
         source: root.source
         allow_stretch: True
@@ -183,6 +189,74 @@
 
 <WaterLilyPH>
     source: "img/water_lily_001.png"
+
+
+<ExerciseOptions>
+    count: int(count_input.text) if count_input.text else 0
+    speed: 1
+    orientation: orient_input.text.lower() if orient_input.text else "horizontal"
+    tp: tp_input.text
+    obj: self.obj
+    Spinner:
+        id: tp_input
+        height: dp(40)
+        width: root.width - dp(20)
+        x: root.x + dp(10)
+        top: root.top
+        text: "Math"
+        values: ["Math", "Interval"]
+    Spinner:
+        id: orient_input
+        height: dp(40)
+        width: root.width - dp(20)
+        x: root.x + dp(10)
+        top: tp_input.y
+        text: "Horizontal"
+        values: ["Horizontal", "Vertical"]
+    Label:
+        id: count_label
+        text: "Count"
+        height: self.font_size
+        x: root.x
+        top: orient_input.y
+    NumericInput:
+        id: count_input
+        x: root.x
+        top: count_label.y
+        width: root.width
+        text: "5"
+        height: self.font_size * 2
+
+
+<ExercisePH>
+    source: "img/water_lily_001.png"
+    distance: dp(100)
+    count: self.options.count if self.options else 5
+    orientation: self.options.orientation if self.options else "horizontal"
+    width: dp(60)
+    height: dp(60)
+    real_points: [0 + dp(30), root.height / 2, root.count * (root.distance + 1) + dp(30), root.height / 2]
+    ph_points: [dp(30), root.height / 2, dp(30), root.height / 2]
+    line_points: [0, 0, 0, 0] if not root.ph_points else root.ph_points
+    exercise_text: ""
+    Label:
+        text: "a"
+        center: root.img.center
+    Label:
+        text: root.exercise_text
+        font_size: dp(25)
+        width: dp(200)
+        center_x: root.distance / 2 if root.orientation == "vertical" else root.count / 2 * root.distance + root.distance / 2
+        y: - 2.5 * self.font_size
+        halign: "center"
+    Widget:
+        canvas:
+            Color:
+                rgba: .2, 1, .2, .7
+            Line:
+                cap_precision: 25
+                width: dp(30)
+                points: [0, 0, 0, 0] if not root.line_points else root.line_points
 
 
 <StoneLilyPH>

@@ -870,7 +870,7 @@ class IntervalWidget(ExerciseWidget):
                 self.lilys[i].pos = (self.pos[0] + i * self.distance,
                                      self.pos[1])
             else:
-                self.lilys[i].pos = (self.pos[0],
+                self.lilys[i].pos = (self.pos[0] + dp(15),
                                      self.pos[1] + i * self.distance)
         Clock.unschedule(self.move)
         Clock.schedule_interval(self.move, 1 / 30)
