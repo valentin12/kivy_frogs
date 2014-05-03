@@ -1,0 +1,18 @@
+level boats=1 flys=4 energy=4 size=10,7
+switchlily pos=9,1 id=object_022 controlled=object_003
+waterlily pos=9,2 id=object_021 
+stonelily pos=9,3 id=object_020 
+waterlily pos=5,1 id=object_019 
+waterlily pos=2,5 id=object_018 
+switchlily pos=5,3 id=object_010 controlled=object_018
+waterlily pos=5,2 id=object_008 
+stonelily pos=1,4 id=object_007 
+switchlily pos=9,5 id=object_005 controlled=object_021
+switchlily pos=1,5 id=object_004 controlled=object_008
+waterlily pos=5,4 id=object_003 
+math pos=3,5 id=object_000 count=6 orientation=horizontal 
+end pos=5,6 id=end 
+start pos=5,0 id=start 
+frog id=player jump_img=img/frog_black_blue_jump.png sit_img=img/frog_black_blue_sit.png player=True place=start
+frog jump_img=img/frog_green_jump.png sit_img=img/frog_green_sit.png place=object_020
+frog jump_img=img/frog_green_jump.png sit_img=img/frog_green_sit.png place=object_007

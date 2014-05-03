@@ -79,7 +79,7 @@
         text: "Export"
         height: dp(40)
         width: root.width - dp(20)
-        on_press: app.editor.export_level(root.next_level_name())
+        on_press: app.editor.export_popup.open()
     Button:
         id: clear
         center_x: root.center_x
@@ -167,6 +167,23 @@
         pos: root.x, object_label.y - root.offset - self.height
         width: root.width
         on_pos: for child in self.children: child.x = root.x
+
+
+<ExportPopup>
+    overwrite_btn: overwrite_btn
+    Button:
+        text: "New"
+        on_press: app.editor.last_export = app.editor.next_level_name(); app.editor.export_level(app.editor.last_export); app.add_custom_level(app.editor.last_export); overwrite_btn.disabled = False; app.editor.export_popup.dismiss()
+        size_hint: .5, 1
+        pos: root.pos
+    Button:
+        id: overwrite_btn
+        text: "Overwrite"
+        disabled: True if not hasattr(app, "editor") else False if app.editor.last_export else True
+        on_press: app.editor.overwrite_level(); app.editor.export_popup.dismiss()
+        size_hint: .5, 1
+        x: root.center_x
+        y: root.y
 
 
 <PHScatter>
@@ -348,6 +365,7 @@
     object_count: 0
     sidebar: sidebar
     select: select
+    last_export: ""
     BackgroundPH:
         id: background
         source: "img/background_blue.png"

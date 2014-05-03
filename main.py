@@ -231,6 +231,14 @@ class FrogApp(App):
         self.main.add_widget(self.game)
         self.game.running = True
 
+    def add_custom_level(self, path):
+        self.custom_levels.append(path)
+        btn = Button(text=str(len(self.custom_levels)),
+                     font_size=dp(25))
+        btn.bind(on_press=self.load_custom_level)
+        btn.path = path
+        self.level_popup.content.custom_levels.add_widget(btn)
+
 
 class GameWidget(Widget):
 

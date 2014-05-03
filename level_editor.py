@@ -6,6 +6,7 @@ from kivy.uix.image import Image
 from kivy.uix.scatterlayout import ScatterLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
+from kivy.uix.popup import Popup
 from kivy.properties import ObjectProperty, NumericProperty,\
     OptionProperty, StringProperty
 from os.path import isfile
@@ -16,6 +17,16 @@ Builder.load_file("editor.kv")
 
 
 class LevelEditorWidget(Widget):
+    def __init__(self, **kwargs):
+        super(LevelEditorWidget, self).__init__(**kwargs)
+        self.export_popup = Popup(title="Export ...",
+                                  content=ExportPopup(),
+                                  size_hint=(.3, .3))
+
+    def overwrite_level(self):
+        if self.last_export:
+            self.export_level(self.last_export)
+
     def export_level(self, path):
         out = "level boats={} flys={} energy={} ".format(
             self.sidebar.level_settings.boats_count.text,
@@ -63,16 +74,16 @@ class LevelEditorWidget(Widget):
             s = "{} pos={},{} id={}".format(tp, x, y, id)
             out += s + extra_opts + "\n"
         # Add the player frog
-        out += "frog id=player jump_img={} sit_img={} player=True place=start\n"\
+        out += "frog id=player jump_img={} sit_img={}"\
             .format(
                 self.level.start.frog.jump_img,
-                self.level.start.frog.sit_img)
+                self.level.start.frog.sit_img) +\
+            " player=True place=start\n"
         # Add the other frogs
         for frog in [c for c in self.level.children
                      if type(c) == FrogPH]:
             out += "frog jump_img={} sit_img={} place={}\n".format(
                 frog.jump_img, frog.sit_img, frog.place)
-        print out
         f = open(path, "w")
         f.write(out)
         f.close()
@@ -81,9 +92,13 @@ class LevelEditorWidget(Widget):
         i = 1
         LOOP = True
         while LOOP:
-            if not isfile("levels/custom_level_%d3.txt" % i):
+            if not isfile("levels/custom_level_%03d.txt" % i):
                 return "levels/custom_level_%03d.txt" % i
             i += 1
+
+
+class ExportPopup(Widget):
+    pass
 
 
 class LevelScatter(Scatter):
@@ -186,11 +201,11 @@ class PHScatter(Scatter):
             self.app.editor.sidebar.object_content.clear_widgets()
             if self.options:
                 self.options.top = self.app.editor.\
-                                   sidebar.object_content.top
+                    sidebar.object_content.top
                 self.options.x = self.app.editor.\
-                                 sidebar.object_content.x
+                    sidebar.object_content.x
                 self.options.width = self.app.editor.\
-                             sidebar.object_content.width
+                    sidebar.object_content.width
                 self.app.editor.sidebar.object_content.add_widget(
                     self.options)
         return super(PHScatter, self).on_touch_down(touch)
@@ -249,7 +264,6 @@ class ExerciseOptions(Widget):
         self.obj.count = value
 
     def on_orientation_change(self, instance, value):
-        print "changed orientation to: " + value
         self.obj.orientation = value
 
 
@@ -270,7 +284,6 @@ class ExercisePH(PHScatter):
         self.exercise_text = "Exercise: ..."
 
     def on_count_change(self, instance, value):
-        print "ExercisePH: changed count to " + str(value)
         self.recalculate_real_points()
 
     def recalculate_real_points(self):
@@ -289,7 +302,6 @@ class ExercisePH(PHScatter):
         self.line_points = self.real_points
 
     def on_orient_change(self, instance, value):
-        print "ExercisePH: changed orientation to " + str(value)
         self.recalculate_real_points()
 
 
@@ -424,8 +436,8 @@ class SelectButton(Button):
                 if type(o) in [WaterLilyPH,
                                StoneLilyPH,
                                SwitchLilyPH] and o.collide_point(
-                                   *touch.pos
-                               ) and o not in self.ignore:
+                        *touch.pos
+                        ) and o not in self.ignore:
                     self.selected = o
                     return True
             self.selected = None

@@ -219,12 +219,12 @@ def build_level(filename, app, root):
             if "controlled" in lily:
                 try:
                     cont = dict(root.objects.items() +
-                                        root.standard_objects.items()
-                                    )[lily["controlled"]]
+                                root.standard_objects.items()
+                                )[lily["controlled"]]
                     l = SwitchLily(app=app, root=root)
                     l.controlled = cont
                 except KeyError:
-                    # if the controlled doesn't exist, make it static  
+                    # if the controlled doesn't exist, make it static
                     l = StoneLily(app=app, root=root)
             else:
                 l = StoneLily(app=app, root=root)
