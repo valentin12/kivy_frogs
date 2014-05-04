@@ -21,6 +21,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.slider import Slider
 from kivy.uix.button import Button
 from kivy.uix.label import Label
+from kivy.graphics import Ellipse, Color
 from kivy.config import Config
 
 from math import pi
@@ -64,6 +65,8 @@ class FrogApp(App):
             "jump": SoundLoader.load("snd/jump.wav"),
             "background": SoundLoader.load("snd/short_background.wav"),
             "no_energy": SoundLoader.load("snd/wrong.wav"),
+            "mechanical_appear": SoundLoader.load(
+                "snd/mechanic_appear.wav"),
             # sounds for IntervalWidget
             "c1": SoundLoader.load("snd/c1.wav"),
             "d1": SoundLoader.load("snd/d1.wav"),
@@ -430,6 +433,7 @@ class SwitchLily(WaterLily):
         if self.controlled:
             if value:
                 self.controlled.appear(None)
+                self.app.sounds["mechanical_appear"].play()
             else:
                 self.controlled.force_sinking()
 
@@ -444,6 +448,7 @@ class SwitchLily(WaterLily):
         self.controlled.bind(free=self.on_controlled_free_changed)
         if self.pressed:
             self.controlled.appear(None)
+            self.app.sounds["mechanical_appear"].play()
         else:
             self.controlled.force_sinking()
 
@@ -588,7 +593,7 @@ class Frog(Widget):
                     collide = lily.collide_point(*end)
                 if collide:
                     if type(lily) == MoveableWaterLily:
-                        if lily.text != lily.solution:
+                        if lily.value != lily.solution:
                             continue
                     die = False
                     if lily.free and self.app.game.energy:
@@ -693,6 +698,9 @@ class Frog(Widget):
 
 
 class ExerciseWidget(Widget):
+    count = NumericProperty(5)
+    distance = NumericProperty(dp(100))
+    initialized = False
     lilys = []
 
     def move(self, dt):
@@ -716,9 +724,6 @@ class ExerciseWidget(Widget):
 class MathWidget(ExerciseWidget):
     number_range = ListProperty((-10, 10))
     type = StringProperty("add")
-    count = NumericProperty(5)
-    distance = NumericProperty(dp(100))
-    initialized = False
 
     def on_pos(self, instance, pos):
         self.setup()
@@ -796,16 +801,18 @@ class MathWidget(ExerciseWidget):
                 r.append((a + i + add) / float(b))
         self.lilys = [MoveableWaterLily()]
         self.lilys[0].text = c
+        self.lilys[0].value = c
         self.lilys[0].solution = c
         for i in range(self.count - 1):
             try:
                 n = r[randint(0, len(r))]
                 r.remove(n)
                 self.lilys.append(
-                    MoveableWaterLily(text=n, solution=c))
+                    MoveableWaterLily(text=n, value=n, solution=c))
             except IndexError:
+                n = randint(*self.number_range)
                 self.lilys.append(MoveableWaterLily(
-                    text=randint(*self.number_range), solution=c))
+                    text=n, value=n, solution=c))
         shuffle(self.lilys)
         for i in range(len(self.lilys)):
             self.lily_widget.add_widget(self.lilys[i])
@@ -813,16 +820,13 @@ class MathWidget(ExerciseWidget):
                 self.lilys[i].pos = (self.pos[0] + i * self.distance,
                                      self.pos[1])
             else:
-                self.lilys[i].pos = (self.pos[0],
+                self.lilys[i].pos = (self.pos[0] + dp(15),
                                      self.pos[1] + i * self.distance)
         Clock.unschedule(self.move)
         Clock.schedule_interval(self.move, 1 / 30)
 
 
 class IntervalWidget(ExerciseWidget):
-    count = NumericProperty(5)
-    distance = NumericProperty(dp(100))
-    initialized = False
     intervals = [["c1", "P1"],
                  ["d1", "M2"],
                  ["e1", "M3"],
@@ -860,16 +864,19 @@ class IntervalWidget(ExerciseWidget):
         psb.remove(self.solution)
         self.lilys = [MoveableWaterLily()]
         self.lilys[0].text = self.solution[1]
+        self.lilys[0].value = self.solution[1]
         self.lilys[0].solution = self.solution[1]
         for i in range(self.count - 1):
             try:
                 n = choice(psb)
                 psb.remove(n)
                 self.lilys.append(
-                    MoveableWaterLily(text=n[1], solution=self.solution[1]))
+                    MoveableWaterLily(text=n[1], value=n[1],
+                                      solution=self.solution[1]))
             except IndexError:
+                n = choice(self.intervals)[1]
                 self.lilys.append(MoveableWaterLily(
-                    text=choice(self.intervals)[1],
+                    text=n, value=n,
                     solution=self.solution[1]))
         shuffle(self.lilys)
         for i in range(len(self.lilys)):
@@ -888,6 +895,139 @@ class IntervalWidget(ExerciseWidget):
         Clock.schedule_once(lambda dt:
                             self.app.sounds[self.solution[0]].play(),
                             self.app.sounds["c1"].length + .5)
+
+
+class EllipseWidget(Widget):
+    pass
+
+
+class ColorWidget(ExerciseWidget):
+    base_colors = [[1, 0, 0], [1, 1, 0], [0, 0, 1]]
+    real_colors = {str([1., .5, 0.]): [1, .5, 0],
+                   str([.5, 0., .5]): [.5, 0, .5],
+                   str([.5, .5, .5]): [0, 1, 0],
+                   str([1., 0., 0.]): [1, 0, 0],
+                   str([1., 1., 0.]): [1, 1, 0],
+                   str([0., 0., 1.]): [0, 0, 1]}
+
+    def __init__(self, **kwargs):
+        super(ColorWidget, self).__init__(**kwargs)
+
+    def on_pos(self, instance, pos):
+        self.setup()
+
+    def setup(self, force=False):
+        if self.initialized and not force:
+            for i in range(len(self.lilys)):
+                self.lilys[i].pos = (self.pos[0] + i * self.distance,
+                                     self.pos[1])
+            return
+        else:
+            for lily in self.lilys:
+                self.lily_widget.remove_widget(lily)
+            self.lilys = []
+            self.left_of_label.clear_widgets()
+            self.right_of_label.clear_widgets()
+        self.initialized = True
+        choices = self.base_colors[:]
+        self.a = choices.pop(randint(0, len(choices) - 1))
+        self.b = choice(choices)
+        self.solution = [sum(x) / 2. for x in zip(self.a, self.b)]
+        self.left_of_label.add_widget(
+                EllipseWidget(rgb=self.a,
+                              x=self.left_of_label.pos[0],
+                              y=self.left_of_label.pos[1] + dp(10),
+                              size=(dp(20), dp(20))))
+        self.label.text = " + "
+        self.label_width = dp(20)
+        self.right_of_label.add_widget(
+                EllipseWidget(rgb=self.b,
+                              x=self.right_of_label.pos[0],
+                              y=self.right_of_label.pos[1] + dp(10),
+                              size=(dp(20), dp(20))))
+        # other posibilities
+        self.lilys = [MoveableWaterLily()]
+        self.lilys[0].solution = self.solution
+        self.lilys[0].text = ""
+        self.lilys[0].value = self.solution
+        for i in range(self.count - 1):
+            n = [sum(x) / 2. for x in
+                 zip(self.base_colors[
+                     randint(0, len(self.base_colors) - 1)],
+                     self.base_colors[
+                         randint(0, len(self.base_colors) - 1)]
+                 )]
+            self.lilys.append(
+                MoveableWaterLily(text="",
+                                  value=n,
+                                  solution=self.solution))
+        for lily in self.lilys:
+            lily.custom.add_widget(
+                EllipseWidget(rgb=self.real_colors[str(lily.value)],
+                              center=lily.custom.center,
+                              size=(dp(20), dp(20))))
+        shuffle(self.lilys)
+        for i in range(len(self.lilys)):
+            self.lily_widget.add_widget(self.lilys[i])
+            if self.orientation == "horizontal":
+                self.lilys[i].pos = (self.pos[0] + i * self.distance,
+                                     self.pos[1])
+            else:
+                self.lilys[i].pos = (self.pos[0] + dp(15),
+                                     self.pos[1] + i * self.distance)
+        Clock.unschedule(self.move)
+        Clock.schedule_interval(self.move, 1 / 30)
+
+
+class RomanWidget(ExerciseWidget):
+    def int_to_roman(self, n):
+        ints = (1000, 900,  500, 400, 100,  90, 50,  40, 10,  9,   5,  4,   1)
+        nums = ('M',  'CM', 'D', 'CD','C', 'XC','L','XL','X','IX','V','IV','I')
+        result = ""
+        for i in range(len(ints)):
+            count = int(n / ints[i])
+            result += nums[i] * count
+            n -= ints[i] * count
+        return result
+
+    def on_pos(self, instance, pos):
+        self.setup()
+
+    def setup(self, force=False):
+        if self.initialized and not force:
+            for i in range(len(self.lilys)):
+                self.lilys[i].pos = (self.pos[0] + i * self.distance,
+                                     self.pos[1])
+            return
+        else:
+            for lily in self.lilys:
+                self.lily_widget.remove_widget(lily)
+            self.lilys = []
+        self.initialized = True
+        n = randint(0, 1500)
+        self.solution = self.int_to_roman(n)
+        self.label.text = str(n)
+        # other posibilities
+        self.lilys = [MoveableWaterLily()]
+        self.lilys[0].text = self.solution
+        self.lilys[0].value = self.solution
+        self.lilys[0].solution = self.solution
+        for i in range(self.count - 1):
+            n = self.int_to_roman(choice([1, -1]) * randint(1, 20))
+            self.lilys.append(
+                MoveableWaterLily(text=n, value=n,
+                                  solution=self.solution))
+        shuffle(self.lilys)
+        for i in range(len(self.lilys)):
+            self.lily_widget.add_widget(self.lilys[i])
+            if self.orientation == "horizontal":
+                self.lilys[i].pos = (self.pos[0] + i * self.distance,
+                                     self.pos[1])
+            else:
+                self.lilys[i].pos = (self.pos[0] + dp(15),
+                                     self.pos[1] + i * self.distance)
+        Clock.unschedule(self.move)
+        Clock.schedule_interval(self.move, 1 / 30)
 
 
 class GameScatter(Scatter):

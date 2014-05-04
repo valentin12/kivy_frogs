@@ -1,6 +1,7 @@
 from kivy.uix.widget import Widget
 from main import GameWidget, WaterLily, StoneLily,\
-    MathWidget, Frog, JumpLine, Fly, Boat, SwitchLily, IntervalWidget
+    MathWidget, Frog, JumpLine, Fly, Boat, SwitchLily, IntervalWidget,\
+    ColorWidget, RomanWidget
 from kivy.metrics import dp
 from os import listdir, getcwd
 
@@ -209,6 +210,70 @@ def build_level(filename, app, root):
                 i.speed = 1
             if "orientation" in interval:
                 i.orientation = interval["orientation"]
+            else:
+                i.orientation = "horizontal"
+            i.setup(force=True)
+            root.game_scatter.before_jumpline.add_widget(i)
+            root.lily_provider.append(i)
+    if "color" in level:
+        for i in range(len(level["color"])):
+            color = level["color"][i]
+            try:
+                i = [iv for iv in root.store if type(iv) == ColorWidget][i]
+            except IndexError:
+                i = ColorWidget()
+                root.store.append(i)
+            if "id" in color:
+                i.id = color["id"]
+                if i.id not in root.objects:
+                    root.objects[i.id] = i
+            if "pos" in color:
+                x, y = calculate_point(
+                    color["pos"].split(","), distance)
+                i.center_x = x
+                i.y = y
+            if "count" in color:
+                i.count = int(color["count"])
+            else:
+                i.count = 5
+            if "speed" in color:
+                i.speed = float(color["speed"])
+            else:
+                i.speed = 1
+            if "orientation" in color:
+                i.orientation = color["orientation"]
+            else:
+                i.orientation = "horizontal"
+            i.setup(force=True)
+            root.game_scatter.before_jumpline.add_widget(i)
+            root.lily_provider.append(i)
+    if "roman" in level:
+        for i in range(len(level["roman"])):
+            roman = level["roman"][i]
+            try:
+                i = [iv for iv in root.store if type(iv) == RomanWidget][i]
+            except IndexError:
+                i = RomanWidget()
+                root.store.append(i)
+            if "id" in roman:
+                i.id = roman["id"]
+                if i.id not in root.objects:
+                    root.objects[i.id] = i
+            if "pos" in roman:
+                x, y = calculate_point(
+                    roman["pos"].split(","), distance)
+                i.center_x = x
+                i.y = y
+            if "count" in roman:
+                i.count = int(roman["count"])
+            else:
+                i.count = 5
+            if "speed" in roman:
+                i.speed = float(roman["speed"])
+            else:
+                i.speed = 1
+            if "orientation" in roman:
+                i.orientation = roman["orientation"]
             else:
                 i.orientation = "horizontal"
             i.setup(force=True)

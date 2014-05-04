@@ -221,7 +221,7 @@
         x: root.x + dp(10)
         top: root.top
         text: "Math"
-        values: ["Math", "Interval"]
+        values: ["Math", "Interval", "Color", "Roman"]
     Spinner:
         id: orient_input
         height: dp(40)
@@ -252,7 +252,7 @@
     orientation: self.options.orientation if self.options else "horizontal"
     width: dp(60)
     height: dp(60)
-    real_points: [0 + dp(30), root.height / 2, root.count * (root.distance + 1) + dp(30), root.height / 2]
+    real_points: [0 + dp(30), root.height / 2, root.count * (root.distance) + dp(30), root.height / 2]
     ph_points: [dp(30), root.height / 2, dp(30), root.height / 2]
     line_points: [0, 0, 0, 0] if not root.ph_points else root.ph_points
     exercise_text: ""

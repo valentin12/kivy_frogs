@@ -200,13 +200,30 @@
     static: True
     auto_reappear: False
     label: label
+    custom: custom
     text: self.text
+    value: self.value
     solution: self.solution
     Label:
         id: label
         center: root.center
         text: str(round(root.text, 3)) if root.text and type(root.text) == float else str(root.text)
         font_size: dp(20)
+    Widget:
+        id: custom
+        size: root.size
+        pos: root.pos
+        on_pos: for c in self.children: c.center = custom.to_parent(*custom.center)
+
+
+<EllipseWidget>
+    rgb: self.rgb
+    canvas:
+        Color:
+            rgba: [root.rgb[0], root.rgb[1], root.rgb[2], 1] if self.rgb else [1, 1, 0]
+        Ellipse:
+            size: root.size
+            pos: root.pos
 
 
 <SwitchLily>
@@ -225,21 +242,36 @@
     orientation: "horizontal"
     count: 5
     distance: dp(100)
+    height: dp(60)
     speed: 1
     exercise: ""
     label: label
+    left_of_label: left_of_label
+    right_of_label: right_of_label
     label_width: dp(200)
     lily_widget: lily_widget
     Widget:
         id: lily_widget
+        on_pos: for c in lily_widget.children: c.center = self.center
+    Widget:
+        id: left_of_label
+        top: root.y - dp(10)
+        right: label.x
+        size: dp(30), dp(30)
     Label:
         id: label
         font_size: dp(25)
+        height: dp(30)
         text: str(root.exercise)
         width: root.label_width
         center_x: root.pos[0] + root.distance / 2 if root.orientation == "vertical" else root.pos[0] + root.count / 2 * root.distance + root.distance / 2
-        y: root.y - 2.5 * self.font_size
+        top: root.y
         halign: "center"
+    Widget:
+        id: right_of_label
+        top: root.y - dp(10)
+        x: label.right
+        size: dp(30), dp(30)
 
 
 <MathWidget>
@@ -289,6 +321,7 @@
         do_rotate: False
         do_scale: False
         size: game.preferred_size
+        width: game.preferred_size[0] if app.window.width < game.preferred_size[0] else app.window.width
         y: 0
         center_x: game.center_x
         auto_bring_to_front: False
