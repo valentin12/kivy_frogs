@@ -754,7 +754,7 @@ class ExerciseWidget(Widget):
                    self.pos[0] + self.count * self.distance:
                     lily.center_x = self.pos[0]
             else:
-                lily.y += self.speed
+                lily.y += self.speed * 60 * dt
                 if lily.center_y >\
                    self.pos[1] + self.count * self.distance:
                     lily.center_y = self.pos[1]

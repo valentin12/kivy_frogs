@@ -436,7 +436,7 @@ class SelectButton(Button):
                 if type(o) in [WaterLilyPH,
                                StoneLilyPH,
                                SwitchLilyPH] and o.collide_point(
-                        *touch.pos
+                        *self.to_window(*touch.pos)
                         ) and o not in self.ignore:
                     self.selected = o
                     return True
