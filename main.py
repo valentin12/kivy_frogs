@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# coding: utf8
+
 import kivy
 kivy.require("1.8.0")
 from kivy.app import App
@@ -200,7 +203,7 @@ class FrogApp(App):
 
     def build_settings(self, settings):
         settings.register_type("numeric_range", SettingNumericRange)
-        settings.add_json_panel("Frog Settings",
+        settings.add_json_panel("Ọpọlọ Settings",
                                 self.config, filename="frogs.json")
         self.settings = settings
 
@@ -980,17 +983,17 @@ class ColorWidget(ExerciseWidget):
         self.b = choice(choices)
         self.solution = [sum(x) / 2. for x in zip(self.a, self.b)]
         self.left_of_label.add_widget(
-                EllipseWidget(rgb=self.a,
-                              x=self.left_of_label.pos[0],
-                              y=self.left_of_label.pos[1] + dp(10),
-                              size=(dp(20), dp(20))))
+            EllipseWidget(rgb=self.a,
+                          x=self.left_of_label.pos[0],
+                          y=self.left_of_label.pos[1] + dp(10),
+                          size=(dp(20), dp(20))))
         self.label.text = " + "
         self.label_width = dp(20)
         self.right_of_label.add_widget(
-                EllipseWidget(rgb=self.b,
-                              x=self.right_of_label.pos[0],
-                              y=self.right_of_label.pos[1] + dp(10),
-                              size=(dp(20), dp(20))))
+            EllipseWidget(rgb=self.b,
+                          x=self.right_of_label.pos[0],
+                          y=self.right_of_label.pos[1] + dp(10),
+                          size=(dp(20), dp(20))))
         # other posibilities
         self.lilys = [MoveableWaterLily()]
         self.lilys[0].solution = self.solution
@@ -1001,8 +1004,7 @@ class ColorWidget(ExerciseWidget):
                  zip(self.base_colors[
                      randint(0, len(self.base_colors) - 1)],
                      self.base_colors[
-                         randint(0, len(self.base_colors) - 1)]
-                 )]
+                         randint(0, len(self.base_colors) - 1)])]
             self.lilys.append(
                 MoveableWaterLily(text="",
                                   value=n,
@@ -1028,7 +1030,8 @@ class ColorWidget(ExerciseWidget):
 class RomanWidget(ExerciseWidget):
     def int_to_roman(self, n):
         ints = (1000, 900,  500, 400, 100,  90, 50,  40, 10,  9,   5,  4,   1)
-        nums = ('M',  'CM', 'D', 'CD','C', 'XC','L','XL','X','IX','V','IV','I')
+        nums = ('M',  'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL',
+                'X', 'IX', 'V', 'IV', 'I')
         result = ""
         for i in range(len(ints)):
             count = int(n / ints[i])

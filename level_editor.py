@@ -3,10 +3,11 @@ from kivy.uix.widget import Widget
 from kivy.uix.scatter import Scatter
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
-from kivy.uix.scatterlayout import ScatterLayout
+from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
+from kivy.uix.accordion import Accordion
 from kivy.properties import ObjectProperty, NumericProperty,\
     OptionProperty, StringProperty
 from os.path import isfile
@@ -154,7 +155,7 @@ class ToolBar(Widget):
     pass
 
 
-class SideBar(Widget):
+class SideBar(Accordion):
     pass
 
 
@@ -200,14 +201,10 @@ class PHScatter(Scatter):
            == [self.options]:
             self.app.editor.sidebar.object_content.clear_widgets()
             if self.options:
-                self.options.top = self.app.editor.\
-                    sidebar.object_content.top
-                self.options.x = self.app.editor.\
-                    sidebar.object_content.x
-                self.options.width = self.app.editor.\
-                    sidebar.object_content.width
                 self.app.editor.sidebar.object_content.add_widget(
                     self.options)
+                self.options.size = self.app.editor.sidebar\
+                                                   .object_content.size
         return super(PHScatter, self).on_touch_down(touch)
 
     def on_touch_up(self, touch):
@@ -336,6 +333,7 @@ class SwitchLilyPH(PHScatter):
 class BasePH(PHScatter):
     def on_transform_with_touch(self, touch):
         self.current_touch = touch
+        self.app.editor.select.center = self.to_window(*self.center)
 
     def on_touch_up(self, touch):
         if touch == self.current_touch:
@@ -354,6 +352,8 @@ class BasePH(PHScatter):
                 else:
                     LOOP = False
             self.center = center
+            self.app.editor.select.center = self.to_window(
+                *self.center)
             return True
         return super(PHScatter, self).on_touch_up(touch)
 
