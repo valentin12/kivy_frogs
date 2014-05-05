@@ -72,6 +72,16 @@ def build_level(filename, app, root):
     root.status.text = ""
     root.start.free = True
     root.end.free = True
+    # remove double entries in root.store
+    to_del = []
+    for o in root.store:
+        # reset to standard for reuse
+        o.reset()
+        if root.store.count(o) > 1 and o not in to_del:
+            for i in range(root.store.count(o) - 1):
+                to_del.append(o)
+    for o in to_del:
+        root.store.remove(o)
     # load level dict
     level = parse_level(filename)
     # setup level specific things
@@ -114,8 +124,14 @@ def build_level(filename, app, root):
         if "source" in level["end"][0]:
             root.end.source = level["end"][0]["source"]
     if "waterlily" in level:
-        for lily in level["waterlily"]:
-            l = WaterLily(app=app, root=root)
+        for i in range(len(level["waterlily"])):
+            lily = level["waterlily"][i]
+            try:
+                l = [li for li in root.store
+                     if type(li) == WaterLily][i]
+            except IndexError:
+                l = WaterLily(app=app, root=root)
+                root.store.append(l)
             if "id" in lily:
                 l.id = lily["id"]
                 if l.id not in root.objects:
@@ -129,8 +145,14 @@ def build_level(filename, app, root):
             root.game_scatter.before_jumpline.add_widget(l)
             root.lilys.append(l)
     if "stonelily" in level:
-        for lily in level["stonelily"]:
-            l = StoneLily(app=app, root=root)
+        for i in range(len(level["stonelily"])):
+            lily = level["stonelily"][i]
+            try:
+                l = [li for li in root.store
+                     if type(li) == StoneLily][i]
+            except IndexError:
+                l = StoneLily(app=app, root=root)
+                root.store.append(l)
             if "id" in lily:
                 l.id = lily["id"]
                 if l.id not in root.objects:
@@ -280,19 +302,37 @@ def build_level(filename, app, root):
             root.game_scatter.before_jumpline.add_widget(i)
             root.lily_provider.append(i)
     if "switchlily" in level:
-        for lily in level["switchlily"]:
+        for i in range(len(level["switchlily"])):
+            lily = level["switchlily"][i]
             if "controlled" in lily:
                 try:
                     cont = dict(root.objects.items() +
                                 root.standard_objects.items()
                                 )[lily["controlled"]]
-                    l = SwitchLily(app=app, root=root)
+                    try:
+                        l = [li for li in root.store
+                             if type(li) == SwitchLily][i]
+                    except IndexError:
+                        l = SwitchLily(app=app, root=root)
+                        root.store.append(l)
                     l.controlled = cont
                 except KeyError:
                     # if the controlled doesn't exist, make it static
-                    l = StoneLily(app=app, root=root)
+                    try:
+                        l = [li for li in root.store
+                             if type(li) == StoneLily
+                             and not li.parent][0]
+                    except IndexError:
+                        l = StoneLily(app=app, root=root)
+                        root.store.append(l)
             else:
-                l = StoneLily(app=app, root=root)
+                try:
+                    l = [li for li in root.store
+                         if type(li) == StoneLily
+                         and not li.parent][0]
+                except IndexError:
+                    l = StoneLily(app=app, root=root)
+                    root.store.append(l)
             if "id" in lily:
                 l.id = lily["id"]
                 if l.id not in root.objects:
@@ -320,7 +360,7 @@ def build_level(filename, app, root):
             b.active = True
         except IndexError:
             b = Boat(app=app, root=root)
-            root.store.append(boat)
+            root.store.append(b)
         root.boats.append(b)
         root.game_scatter.before_jumpline.add_widget(b)
     # and the frogs

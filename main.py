@@ -59,7 +59,7 @@ class FrogApp(App):
         self.sounds = {
             "lost": SoundLoader.load("snd/lost.wav"),
             "won": SoundLoader.load("snd/won.wav"),
-            "died": SoundLoader.load("snd/died.wav"),
+            "died": SoundLoader.load("snd/platsch.wav"),
             "eat": SoundLoader.load("snd/eat.wav"),
             "sink": SoundLoader.load("snd/sink.wav"),
             "jump": SoundLoader.load("snd/jump.wav"),
@@ -276,11 +276,11 @@ class RandomMover(Widget):
 
     def __init__(self, **kwargs):
         super(RandomMover, self).__init__(**kwargs)
-        Clock.schedule_interval(lambda dt: self.move(), 1 / 30.)
+        Clock.schedule_interval(self.move, 1 / 30.)
 
-    def move(self):
+    def move(self, dt):
         self.scatter.rotation += self.rot_change
-        m = Vector(0, 2 * self.speed).rotate(self.scatter.rotation)
+        m = Vector(0, dt * 60 * self.speed).rotate(self.scatter.rotation)
         self.pos[0] -= m.x
         self.pos[1] -= m.y
         # change direction in ca. every 300th frame
@@ -312,8 +312,8 @@ class RandomMover(Widget):
 
 
 class Fly(RandomMover):
-    def move(self):
-        super(Fly, self).move()
+    def move(self, dt):
+        super(Fly, self).move(dt)
 
     def eat(self, eater):
         self.app.game.energy += 4
@@ -324,18 +324,24 @@ class Fly(RandomMover):
         anim.start(self)
         self.app.sounds["eat"].play()
 
+    def reset(self):
+        self.speed = 1.5
+
 
 class Boat(RandomMover):
-    def move(self):
-        super(Boat, self).move()
+    def move(self, dt):
         if self.active:
             self.check_collision()
+            super(Boat, self).move(dt)
 
     def check_collision(self):
         for lily in self.app.game.lilys:
             if lily.collide_widget(self):
                 if not lily.static:
                     lily.force_sinking()
+
+    def reset(self):
+        self.speed = -1.5
 
 
 class WaterLily(Widget):
@@ -414,16 +420,38 @@ class WaterLily(Widget):
         if value:
             self.app.sounds["sink"].play()
 
+    def reset(self):
+        self.source = "img/water_lily_001.png"
+        self.auto_reappear = True
+        self.static = False
+        self.sinking = False
+        self.appearing = False
+        self.free = True
+        self.scatter.scale = 1
+
 
 class StoneLily(WaterLily):
-    pass
+    def reset(self):
+        super(StoneLily, self).reset()
+        self.source = "img/water_lily_stone.png"
+        self.auto_reappear = False
+        self.static = True
 
 
 class MoveableWaterLily(WaterLily):
-    pass
+    def reset(self):
+        super(MoveableWaterLily, self).reset()
+        self.auto_reappear = False
+        self.static = True
+        self.text = ""
+        self.value = ""
+        self.solution = ""
+        self.custom.clear_widgets()
 
 
 class SwitchLily(WaterLily):
+    controlled = ObjectProperty(None, allownone=True)
+
     def __init__(self, **kwargs):
         super(SwitchLily, self).__init__(**kwargs)
         self.bind(pressed=self.on_pressed)
@@ -442,6 +470,8 @@ class SwitchLily(WaterLily):
         Used to setup the controlled lily, but is not there to
         change while the game is running
         """
+        if not self.controlled:
+            return
         self.controlled.auto_reappear = False
         self.controlled.static = True
         self.controlled.source = self.controlled_img
@@ -455,6 +485,19 @@ class SwitchLily(WaterLily):
     def on_controlled_free_changed(self, instance, value):
         if not self.pressed and value:
             self.controlled.force_sinking()
+
+    def reset(self):
+        # don't override super to disable setting the source
+        self.static = True
+        self.auto_reappear = False
+        self.sinking = False
+        self.appearing = False
+        self.free = True
+        self.scatter.scale = 1
+        self.not_pressed_img = "img/lily_switch_not_pressed.png"
+        self.pressed_img = "img/lily_switch_pressed.png"
+        self.controlled_img = "img/water_lily_controlled.png"
+        self.controlled = None
 
 
 class JumpLine(Widget):
@@ -706,7 +749,7 @@ class ExerciseWidget(Widget):
     def move(self, dt):
         for lily in self.lilys:
             if self.orientation == "horizontal":
-                lily.x += self.speed
+                lily.x += self.speed * 60 * dt
                 if lily.center_x >\
                    self.pos[0] + self.count * self.distance:
                     lily.center_x = self.pos[0]
@@ -719,6 +762,9 @@ class ExerciseWidget(Widget):
                 if frog.place == lily:
                     if not frog.anim_running:
                         frog.center = lily.center
+
+    def reset(self):
+        pass
 
 
 class MathWidget(ExerciseWidget):
