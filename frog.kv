@@ -44,6 +44,31 @@
         cols: 5
         rows: 5
         width: root.width
+
+
+<OverviewWidget>
+    app: app
+    screen: screen
+    size: dp(100), dp(100)
+    pos: 0, 0
+    rect_x: 0
+    rect_y: 0
+    rect_pos: [self.rect_x, self.rect_y]
+    canvas:
+        Color:
+            rgba: .8, 1, .8, .7
+        Rectangle:
+            size: root.size
+            pos: root.pos
+        Color:
+            rgba: 1, 1, 1, 1
+        Line:
+            width: dp(1)
+            rectangle: [root.rect_x, root.rect_y, app.window.width / 5, app.window.height / 5]
+    Widget:
+        id: screen
+        pos: root.pos
+        size: root.size
         
 
 # line to draw jump distance
@@ -52,7 +77,7 @@
     y1: 0
     x2: 0
     y2: 0
-    max: dp(120)
+    max: dp(140)
     canvas:
         Color:
             rgba: 1, 0, 0, .9
@@ -181,7 +206,7 @@
             keep_ratio: False
 
 
-<Base@Image>
+<Base>
     source: self.source
     size_hint: None, None
     size: dp(200), dp(100)
@@ -298,6 +323,7 @@
     status: status
     energy_label: energy_label
     game_scatter: game_scatter
+    overview: overview
     store: []
     lilys: []
     lily_provider: []
@@ -351,6 +377,12 @@
         Widget:
             id: after_jumplines
 
+    OverviewWidget:
+        id: overview
+        width: game.preferred_size[0] / 5
+        height: game.preferred_size[1] / 5
+        rect_x: -game_scatter.x / 5
+        rect_y: -game_scatter.y / 5
     Live:
         id: live
         top: app.window.height - dp(5)

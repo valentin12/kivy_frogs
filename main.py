@@ -24,7 +24,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.slider import Slider
 from kivy.uix.button import Button
 from kivy.uix.label import Label
-from kivy.graphics import Ellipse, Color
+from kivy.graphics import Ellipse, Color, Rectangle
 from kivy.config import Config
 
 from math import pi
@@ -94,9 +94,6 @@ class FrogApp(App):
             self.levels[self.level], self, self.game)
         self.current_level = self.levels[self.level]
         self.repeat_level = False
-        # setup scatter scale. I wanted to allow translation and scale,
-        # but the user was able to rotate then too and so I left the scale
-        # and made it to a setting
         self.game.game_scatter.scale = float(self.config.getfloat(
             "General", "Zoom"))
         # setup background sound
@@ -270,6 +267,10 @@ class GameWidget(Widget):
 
 
 class Background(Image):
+    pass
+
+
+class Base(Image):
     pass
 
 
@@ -538,7 +539,7 @@ class JumpLine(Widget):
         if distance > self.max:
             dir = Vector((
                 start.x - end.x, start.y - end.y))
-            end = start - dir * dp(120) / distance
+            end = start - dir * dp(140) / distance
             self.x2 = end[0]
             self.y2 = end[1]
 
@@ -616,7 +617,7 @@ class Frog(Widget):
             if distance > dp(120):
                 dir = Vector((
                     start.x - end.x, start.y - end.y))
-                end = start - dir * dp(120) / distance
+                end = start - dir * dp(140) / distance
             for fly in self.app.game.flys:
                 if fly.collide_point(*end):
                     fly.eat(self)
@@ -1147,6 +1148,86 @@ class SettingNumericRange(SettingItem):
 
 class LevelChooserPopup(Widget):
     pass
+
+
+class OverviewWidget(Widget):
+    screen = ObjectProperty(None)
+
+    def __init__(self, **kwargs):
+        super(OverviewWidget, self).__init__(**kwargs)
+        Clock.schedule_interval(self.update, .5)
+        self.update(0)
+
+    def update(self, dt):
+        if not self.screen:
+            return
+        with self.screen.canvas:
+            self.screen.canvas.clear()
+            # draw start
+            Color(.2, .2, .1)
+            Ellipse(pos=(
+                self.app.game.standard_objects
+                ["start"].x / 5.,
+                self.app.game.standard_objects
+                ["start"].y / 5.),
+                    size=(
+                        self.app.game.standard_objects
+                        ["start"].width / 5.,
+                        self.app.game.standard_objects
+                        ["start"].height / 5.))
+            # draw end
+            Color(.1, .8, .1)
+            Ellipse(pos=(self.app.game.standard_objects
+                         ["end"].x / 5.,
+                         self.app.game.standard_objects
+                         ["end"].y / 5.),
+                    size=(self.app.game.standard_objects
+                          ["end"].width / 5.,
+                          self.app.game.standard_objects
+                          ["end"].height / 5.))
+            # draw all the other objects
+            objs = self.app.game.game_scatter.before_jumpline\
+                   .children[:]
+            objs.extend(self.app.game.game_scatter.after_jumplines\
+                        .children[:])
+            for ls in self.app.game.lily_provider:
+                objs.extend(ls.lilys[:])
+            for o in objs:
+                pos = (o.x / 5.,
+                       o.y / 5.)
+                size = (o.width / 5.,
+                        o.height / 5.)
+                if type(o) == WaterLily:
+                    if o.source == "img/water_lily_controlled.png":
+                        Color(.81, .8, .8)
+                    else:
+                        Color(.1, .6, .1)
+                    Ellipse(pos=pos,
+                            size=size)
+                elif type(o) == MoveableWaterLily:
+                    Color(0, 1, 0)
+                    Ellipse(pos=pos,
+                            size=size)
+                elif type(o) == StoneLily:
+                    Color(.6, .6, .6)
+                    Ellipse(pos=pos,
+                            size=size)
+                elif type(o) == SwitchLily:
+                    Color(.1, .3, .1)
+                    Ellipse(pos=pos,
+                            size=size)
+                    Color(1, 0, 0)
+                    Ellipse(pos=(pos[0] + o.width / 10. - dp(2),
+                                 pos[1] + o.height / 10. - dp(2)),
+                            size=(dp(4), dp(4)))
+                elif type(o) == Frog:
+                    if o.player:
+                        Color(1, .5, 0)
+                    else:
+                        Color(0, .2, 0)
+                    Ellipse(pos=(pos[0],
+                                 pos[1] + o.height / 20),
+                            size=(size[0], size[1] / 2))
 
 
 if __name__ == '__main__':
