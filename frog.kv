@@ -16,7 +16,7 @@
     alive_img: "img/live.png"
     lost_img: "img/live_lost.png"
     size_hint: None, None
-    size: dp(30), sp(50)
+    size: dp(35), dp(35)
     source: self.alive_img
 
 <LevelChooserPopup>
@@ -255,7 +255,7 @@
         on_pos: for c in lily_widget.children: c.center = self.center
     Widget:
         id: left_of_label
-        top: root.y - dp(10)
+        top: label.top
         right: label.x
         size: dp(30), dp(30)
     Label:
@@ -269,7 +269,7 @@
         halign: "center"
     Widget:
         id: right_of_label
-        top: root.y - dp(10)
+        top: label.top
         x: label.right
         size: dp(30), dp(30)
 
@@ -318,8 +318,8 @@
         app: app
         id: game_scatter
         do_translate: True
-        do_rotate: False
-        do_scale: False
+        do_rotation: False
+        do_scale: True
         size: game.preferred_size
         width: game.preferred_size[0] if app.window.width < game.preferred_size[0] else app.window.width
         y: 0

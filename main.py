@@ -984,15 +984,15 @@ class ColorWidget(ExerciseWidget):
         self.solution = [sum(x) / 2. for x in zip(self.a, self.b)]
         self.left_of_label.add_widget(
             EllipseWidget(rgb=self.a,
-                          x=self.left_of_label.pos[0],
-                          y=self.left_of_label.pos[1] + dp(10),
+                          x=self.left_of_label.center_x - dp(10),
+                          y=self.right_of_label.pos[1] + dp(5),
                           size=(dp(20), dp(20))))
         self.label.text = " + "
         self.label_width = dp(20)
         self.right_of_label.add_widget(
             EllipseWidget(rgb=self.b,
-                          x=self.right_of_label.pos[0],
-                          y=self.right_of_label.pos[1] + dp(10),
+                          x=self.right_of_label.center_x - dp(10),
+                          y=self.right_of_label.pos[1] + dp(5),
                           size=(dp(20), dp(20))))
         # other posibilities
         self.lilys = [MoveableWaterLily()]

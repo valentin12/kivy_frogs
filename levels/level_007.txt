@@ -14,5 +14,5 @@ switchlily pos=4,1 id=object_001 controlled=object_004
 roman pos=2,3 id=object_000 count=5 orientation=horizontal 
 end pos=2,8 id=end 
 start pos=3,0 id=start 
-frog id=player jump_img=img/frog_black_blue_jump.png sit_img=img/frog_black_blue_sit.png player=True place=start
+frog id=player jump_img=img/frog_orange_blue_jump.png sit_img=img/frog_orange_blue_sit.png player=True place=start
 frog jump_img=img/frog_green_jump.png sit_img=img/frog_green_sit.png place=object_003
