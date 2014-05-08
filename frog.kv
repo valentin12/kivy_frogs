@@ -54,14 +54,15 @@
     rect_x: 0
     rect_y: 0
     rect_pos: [self.rect_x, self.rect_y]
+    visible: True
     canvas:
         Color:
-            rgba: .8, 1, .8, .7
+            rgba: .8, 1, .8, .7 if root.visible else 0
         Rectangle:
             size: root.size
             pos: root.pos
         Color:
-            rgba: 1, 1, 1, 1
+            rgba: 1, 1, 1, 1 if root.visible else 0
         Line:
             width: dp(1)
             rectangle: [root.rect_x, root.rect_y, app.window.width / 5, app.window.height / 5]
@@ -421,11 +422,20 @@
         on_press: app.open_settings()
 
     Button:
+        id: level_editor_btn
         top: settings_btn.y - dp(10)
         x: dp(10)
         height: dp(40)
         text: "Level Editor"
         on_press: app.open_level_editor()
+
+    Button:
+        id: toggle_minimap_btn
+        top: level_editor_btn.y - dp(10)
+        x: dp(10)
+        height: dp(40)
+        text: "Toggle Minimap"
+        on_press: root.overview.visible = not root.overview.visible
 
     Label:
         id: energy_label

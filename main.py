@@ -487,7 +487,7 @@ class SwitchLily(WaterLily):
             self.controlled.force_sinking()
 
     def on_controlled_free_changed(self, instance, value):
-        if not self.pressed and value:
+        if not self.pressed and value and self.controlled:
             self.controlled.force_sinking()
 
     def reset(self):
@@ -500,8 +500,9 @@ class SwitchLily(WaterLily):
         self.scatter.scale = 1
         self.not_pressed_img = "img/lily_switch_not_pressed.png"
         self.pressed_img = "img/lily_switch_pressed.png"
-        self.controlled_img = "img/water_lily_controlled.png"
-        self.controlled = None
+        if self.controlled:
+            self.controlled_img = "img/water_lily_controlled.png"
+            self.controlled = None
 
 
 class JumpLine(Widget):
@@ -1054,7 +1055,8 @@ class RomanWidget(ExerciseWidget):
                 self.lily_widget.remove_widget(lily)
             self.lilys = []
         self.initialized = True
-        n = randint(0, 1500)
+        a = randint(0, 1500)
+        n = a
         self.solution = self.int_to_roman(n)
         self.label.text = str(n)
         # other posibilities
@@ -1063,7 +1065,7 @@ class RomanWidget(ExerciseWidget):
         self.lilys[0].value = self.solution
         self.lilys[0].solution = self.solution
         for i in range(self.count - 1):
-            n = self.int_to_roman(choice([1, -1]) * randint(1, 20))
+            n = self.int_to_roman(a + choice([1, -1]) * randint(1, 20))
             self.lilys.append(
                 MoveableWaterLily(text=n, value=n,
                                   solution=self.solution))
@@ -1152,14 +1154,23 @@ class LevelChooserPopup(Widget):
 
 class OverviewWidget(Widget):
     screen = ObjectProperty(None)
+    visible = BooleanProperty(True)
 
     def __init__(self, **kwargs):
         super(OverviewWidget, self).__init__(**kwargs)
         Clock.schedule_interval(self.update, .5)
+        self.bind(visible=self.on_visible_changed)
         self.update(0)
 
+    def on_visible_changed(self, instance, value):
+        if not value:
+            self.screen.canvas.clear()
+
+    def set_visibility(self, b):
+        self.visible = b
+
     def update(self, dt):
-        if not self.screen:
+        if not self.screen or not self.visible:
             return
         with self.screen.canvas:
             self.screen.canvas.clear()
@@ -1188,10 +1199,10 @@ class OverviewWidget(Widget):
             # draw all the other objects
             objs = self.app.game.game_scatter.before_jumpline\
                                              .children[:]
-            objs.extend(self.app.game.game_scatter.after_jumplines
-                        .children[:])
             for ls in self.app.game.lily_provider:
                 objs.extend(ls.lilys[:])
+            objs.extend(self.app.game.game_scatter.after_jumplines
+                        .children[:])
             for o in objs:
                 pos = (o.x / 5.,
                        o.y / 5.)
