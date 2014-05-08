@@ -366,7 +366,30 @@ class EndPH(BasePH):
     pass
 
 
+class FrogOptions(Widget):
+    obj = ObjectProperty(None)
+    color = StringProperty("yellow")
+    # the available colors with their imgs
+    c_opts = {"green": ["img/frog_green_jump.png",
+                        "img/frog_green_sit.png"],
+              "yellow": ["img/frog_yellow_jump.png",
+                         "img/frog_yellow_sit.png"],
+              "blue-black": ["img/frog_black_blue_jump.png",
+                             "img/frog_black_blue_sit.png"]}
+
+    def __init__(self, **kwargs):
+        super(FrogOptions, self).__init__(**kwargs)
+        self.bind(color=self.on_color_changed)
+
+    def on_color_changed(self, instance, value):
+        print "Changed color to " + value.lower()
+        self.obj.jump_img = self.c_opts[value.lower()][0]
+        self.obj.sit_img = self.c_opts[value.lower()][1]
+
+
 class FrogPH(PHScatter):
+    option_type = FrogOptions
+
     def on_touch_up(self, touch):
         if touch == self.current_touch:
             self.current_touch = None

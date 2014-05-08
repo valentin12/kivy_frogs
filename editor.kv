@@ -310,6 +310,27 @@
     size: dp(200), dp(100)
 
 
+<FrogOptions>
+    obj: self.obj
+    color: color_input.text
+    Label:
+        id: color_label
+        width: root.width
+        height: self.font_size
+        top: root.top
+        x: root.x
+        text: "Frog Color"
+    Spinner:
+        id: color_input
+        height: dp(40)
+        width: root.width - dp(20)
+        x: root.x + dp(10)
+        top: color_label.y - dp(5)
+        text: "Green"
+        values: ["Blue-Black", "Green", "Yellow"]
+    
+
+
 <FrogPH>
     sit_img: "img/frog_green_sit.png"
     jump_img: "img/frog_green_jump.png"

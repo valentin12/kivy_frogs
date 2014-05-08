@@ -539,7 +539,7 @@ class JumpLine(Widget):
         if distance > self.max:
             dir = Vector((
                 start.x - end.x, start.y - end.y))
-            end = start - dir * dp(140) / distance
+            end = start - dir * self.max / distance
             self.x2 = end[0]
             self.y2 = end[1]
 
@@ -614,10 +614,10 @@ class Frog(Widget):
             start = Vector(self.center)
             end = Vector(touch.pos)
             distance = start.distance(end)
-            if distance > dp(120):
+            if distance > dp(125):
                 dir = Vector((
                     start.x - end.x, start.y - end.y))
-                end = start - dir * dp(140) / distance
+                end = start - dir * dp(125) / distance
             for fly in self.app.game.flys:
                 if fly.collide_point(*end):
                     fly.eat(self)
@@ -1170,11 +1170,11 @@ class OverviewWidget(Widget):
                 ["start"].x / 5.,
                 self.app.game.standard_objects
                 ["start"].y / 5.),
-                    size=(
-                        self.app.game.standard_objects
-                        ["start"].width / 5.,
-                        self.app.game.standard_objects
-                        ["start"].height / 5.))
+                size=(
+                    self.app.game.standard_objects
+                    ["start"].width / 5.,
+                    self.app.game.standard_objects
+                    ["start"].height / 5.))
             # draw end
             Color(.1, .8, .1)
             Ellipse(pos=(self.app.game.standard_objects
@@ -1187,8 +1187,8 @@ class OverviewWidget(Widget):
                           ["end"].height / 5.))
             # draw all the other objects
             objs = self.app.game.game_scatter.before_jumpline\
-                   .children[:]
-            objs.extend(self.app.game.game_scatter.after_jumplines\
+                                             .children[:]
+            objs.extend(self.app.game.game_scatter.after_jumplines
                         .children[:])
             for ls in self.app.game.lily_provider:
                 objs.extend(ls.lilys[:])
