@@ -377,14 +377,21 @@ class FrogOptions(Widget):
               "blue-black": ["img/frog_black_blue_jump.png",
                              "img/frog_black_blue_sit.png"],
               "red-black": ["img/frog_black_red_jump.png",
-                            "img/frog_black_red_sit.png"]}
+                            "img/frog_black_red_sit.png"],
+              "turquoise-black": ["img/frog_black_turquoise_jump.png",
+                                  "img/frog_black_turquoise_sit.png"],
+              "rose": ["img/frog_rose_jump.png",
+                       "img/frog_rose_sit.png"],
+              "yellow-black": ["img/frog_black_yellow_jump.png",
+                               "img/frog_black_yellow_sit.png"],
+              "blue-orange": ["img/frog_blue_orange_jump.png",
+                              "img/frog_blue_orange_sit.png"]}
 
     def __init__(self, **kwargs):
         super(FrogOptions, self).__init__(**kwargs)
         self.bind(color=self.on_color_changed)
 
     def on_color_changed(self, instance, value):
-        print "Changed color to " + value.lower()
         self.obj.jump_img = self.c_opts[value.lower()][0]
         self.obj.sit_img = self.c_opts[value.lower()][1]
 
