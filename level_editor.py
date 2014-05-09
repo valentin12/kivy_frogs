@@ -459,9 +459,10 @@ class SelectButton(Button):
             self.selecting = False
             for o in self.app.editor.level.children:
                 if type(o) in [WaterLilyPH,
-                               StoneLilyPH,
-                               SwitchLilyPH] and o.collide_point(
-                        *self.to_window(*touch.pos)
+                               StoneLilyPH] and o.collide_point(
+                        *self.app.editor.level.to_window(
+                            *self.app.editor.level.to_widget(
+                                *touch.pos))
                         ) and o not in self.ignore:
                     self.selected = o
                     return True
