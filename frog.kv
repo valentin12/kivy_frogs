@@ -347,8 +347,9 @@
         do_translate: True
         do_rotation: False
         do_scale: True
+        do_collide_after_children: False
         size: game.preferred_size
-        width: game.preferred_size[0] if app.window.width < game.preferred_size[0] else app.window.width
+        width: game.preferred_size[0] # if app.window.width < game.preferred_size[0] else app.window.width
         y: 0
         center_x: game.center_x
         auto_bring_to_front: False
@@ -401,40 +402,45 @@
         id: help_btn
         top: live2.y - dp(10)
         x: dp(10)
-        height: dp(40)
-        text: "Help"
+        size: dp(40), dp(40)
+        background_normal: "img/icons/help.jpg"
+        background_down: "img/icons/help.jpg"
         on_press: app.help_popup.open()
 
     Button:
         id: level_btn
         top: help_btn.y - dp(10)
         x: dp(10)
-        height: dp(40)
-        text: "Level"
+        size: dp(40), dp(40)
+        background_normal: "img/icons/level.jpg"
+        background_down: "img/icons/level.jpg"
         on_press: app.level_popup.open()
 
     Button:
         id: settings_btn
         top: level_btn.y - dp(10)
         x: dp(10)
-        height: dp(40)
-        text: "Settings"
+        size: dp(40), dp(40)
+        background_normal: "img/icons/settings.jpg"
+        background_down: "img/icons/settings.jpg"
         on_press: app.open_settings()
 
     Button:
         id: level_editor_btn
         top: settings_btn.y - dp(10)
         x: dp(10)
-        height: dp(40)
-        text: "Level Editor"
+        size: dp(40), dp(40)
+        background_normal: "img/icons/editor.jpg"
+        background_down: "img/icons/editor.jpg"
         on_press: app.open_level_editor()
 
     Button:
         id: toggle_minimap_btn
         top: level_editor_btn.y - dp(10)
         x: dp(10)
-        height: dp(40)
-        text: "Toggle Minimap"
+        size: dp(40), dp(40)
+        background_normal: "img/icons/map.jpg"
+        background_down: "img/icons/map.jpg"
         on_press: root.overview.visible = not root.overview.visible
 
     Label:

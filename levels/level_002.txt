@@ -1,5 +1,4 @@
 level boats=1 flys=4 energy=4 size=5,7
-waterlily pos=0,1 id=object_007 
 waterlily pos=2,6 id=object_006 
 waterlily pos=2,5 id=object_005 
 waterlily pos=2,4 id=object_004 

@@ -115,6 +115,8 @@ class FrogApp(App):
         help_img = Image(source="img/help.png")
         self.help_popup.content = help_img
         self.help_popup.bind(on_touch_down=self.help_popup.dismiss)
+        self.help_popup.bind(on_open=self.pause_game)
+        self.help_popup.bind(on_dismiss=self.continue_game)
         # popup to choose a level
         l = LevelChooserPopup()
         i = 1
@@ -136,6 +138,12 @@ class FrogApp(App):
         # level editor
         self.editor = LevelEditorWidget(app=self)
         return self.main
+
+    def pause_game(self, *args):
+        self.game.running = False
+
+    def continue_game(self, *args):
+        self.game.running = True
 
     def restart(self):
         level_parser.build_level(

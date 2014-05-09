@@ -375,7 +375,9 @@ class FrogOptions(Widget):
               "yellow": ["img/frog_yellow_jump.png",
                          "img/frog_yellow_sit.png"],
               "blue-black": ["img/frog_black_blue_jump.png",
-                             "img/frog_black_blue_sit.png"]}
+                             "img/frog_black_blue_sit.png"],
+              "red-black": ["img/frog_black_red_jump.png",
+                            "img/frog_black_red_sit.png"]}
 
     def __init__(self, **kwargs):
         super(FrogOptions, self).__init__(**kwargs)
