@@ -117,6 +117,13 @@ class FrogApp(App):
         self.help_popup.bind(on_touch_down=self.help_popup.dismiss)
         self.help_popup.bind(on_open=self.pause_game)
         self.help_popup.bind(on_dismiss=self.continue_game)
+        # popup to display about
+        self.about_popup = Popup(title="About",
+                                attach_to=self.game)
+        self.about_popup.content = AboutPopup()
+        self.about_popup.bind(on_touch_down=self.about_popup.dismiss)
+        self.about_popup.bind(on_open=self.pause_game)
+        self.about_popup.bind(on_dismiss=self.continue_game)
         # popup to choose a level
         l = LevelChooserPopup()
         i = 1
@@ -1157,6 +1164,10 @@ class SettingNumericRange(SettingItem):
 
 
 class LevelChooserPopup(Widget):
+    pass
+
+
+class AboutPopup(Widget):
     pass
 
 

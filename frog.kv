@@ -46,6 +46,30 @@
         width: root.width
 
 
+<AboutPopup>
+    app: app
+    Label:
+        id: title
+        font_size: dp(40)
+        height: self.font_size
+        text: "An Ọpọlọ is a frog"
+        center_x: root.center_x
+        top: root.top
+    Image:
+        id: vowo_icon
+        size: dp(150), dp(150)
+        allow_stretch: True
+        keep_ratio: False
+        source: "img/vocaword.png"
+        center_x: root.center_x
+        top: title.y - dp(10)
+    Label:
+        id: about_me
+        text: "About me: I'm a hobby developer\nand I'm developing for Voca-Word,\n a serious games website,\ntogether with Peter Koppatz.\nOur projects can be\nfound on vocaword.org"
+        center_x: root.center_x
+        top: vowo_icon.y - dp(10)
+
+
 <OverviewWidget>
     app: app
     screen: screen
@@ -408,8 +432,18 @@
         on_touch_down: if self.collide_point(*args[1].pos): app.help_popup.open()
 
     Image:
-        id: level_btn
+        id: about_btn
         top: help_btn.y - dp(10)
+        x: dp(10)
+        size: dp(40), dp(40)
+        allow_stretch: True
+        keep_ratio: False
+        source: "img/icons/about.jpg"
+        on_touch_down: if self.collide_point(*args[1].pos): app.about_popup.open()
+
+    Image:
+        id: level_btn
+        top: about_btn.y - dp(10)
         x: dp(10)
         size: dp(40), dp(40)
         allow_stretch: True
