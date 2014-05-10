@@ -210,7 +210,8 @@ class PHScatter(Scatter):
     def on_touch_up(self, touch):
         if touch == self.current_touch:
             self.current_touch = None
-            if self.app.editor.delete.collide_point(*self.center):
+            if self.app.editor.delete.collide_point(
+                    *self.to_window(*touch.pos)):
                 for f in [frog for frog in self.parent.children
                           if type(frog) == FrogPH]:
                     if f.place == self.id:
@@ -219,6 +220,8 @@ class PHScatter(Scatter):
                 return True
             x = int(round(self.center_x / dp(100), 0))
             y = int(round(self.y / dp(100), 0))
+            x = x if x > 0 else 1
+            y = y if y > 0 else 1
             center_x = dp(100) * x
             y = dp(100) * y
             # Loop until a free place was found
@@ -339,7 +342,9 @@ class BasePH(PHScatter):
         if touch == self.current_touch:
             self.current_touch = None
             x = int(round(self.center_x / dp(100), 0))
+            x = x if x > -1 else 0
             y = int(round(self.y / dp(100), 0))
+            y = y if y > -1 else 0
             center = (dp(100) * x, dp(100) * y + dp(50))
             # Loop until a free place was found
             LOOP = True
