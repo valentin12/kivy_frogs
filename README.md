@@ -20,6 +20,10 @@ Credits
 * All sounds are made by me (Valentin Pratz) and Peter Koppatz.
 * The images are mostly self made with Blender (http://blender.org). The models can be found in the models/ folder
 
+Technical information
+---------------------
+The game is designed to run on all sizes of devices, but the performance on Android is very worse. (Download: https://play.google.com/store/apps/details?id=org.vocaword.frogs). Maybe in new versions the problem will get fixed.
+
 More information
 ----------------
 More information will follow soon on http://vocaword.org

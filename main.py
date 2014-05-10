@@ -1228,11 +1228,18 @@ class OverviewWidget(Widget):
                        o.y / 5.)
                 size = (o.width / 5.,
                         o.height / 5.)
-                if type(o) == WaterLily:
+                try:
                     if o.source == "img/water_lily_controlled.png":
+                        if o.scatter.scale < .01:
+                            continue
                         Color(.81, .8, .8)
-                    else:
-                        Color(.1, .6, .1)
+                        Ellipse(pos=pos,
+                                size=size)
+                        continue
+                except AttributeError:
+                    pass
+                if type(o) == WaterLily:
+                    Color(.1, .6, .1)
                     Ellipse(pos=pos,
                             size=size)
                 elif type(o) == MoveableWaterLily:

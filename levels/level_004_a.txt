@@ -1,0 +1,28 @@
+level boats=1 flys=4 energy=4 size=6,6
+stonelily pos=5,2 id=object_016 
+switchlily pos=5,3 id=object_015 controlled=object_010
+stonelily pos=5,4 id=object_014 
+stonelily pos=3,4 id=object_013 
+stonelily pos=3,2 id=object_011 
+waterlily pos=4,4 id=object_010 
+waterlily pos=2,4 id=object_009 
+stonelily pos=1,4 id=object_008 
+stonelily pos=1,2 id=object_007 
+stonelily pos=5,1 id=object_005 
+stonelily pos=1,1 id=object_004 
+waterlily pos=4,1 id=object_003 
+switchlily pos=1,3 id=object_002 controlled=object_009
+waterlily pos=2,1 id=object_001 
+stonelily pos=3,1 id=object_000 
+end pos=3,5 id=end 
+start pos=3,0 id=start 
+frog id=player jump_img=img/frog_orange_blue_jump.png sit_img=img/frog_orange_blue_sit.png player=True place=start
+frog jump_img=img/frog_black_blue_jump.png sit_img=img/frog_black_blue_sit.png place=object_013
+frog jump_img=img/frog_black_yellow_jump.png sit_img=img/frog_black_yellow_sit.png place=object_014
+frog jump_img=img/frog_black_light_blue_jump.png sit_img=img/frog_black_light_blue_sit.png place=object_008
+frog jump_img=img/frog_yellow_jump.png sit_img=img/frog_yellow_sit.png place=object_007
+frog jump_img=img/frog_black_turquoise_jump.png sit_img=img/frog_black_turquoise_sit.png place=object_016
+frog jump_img=img/frog_rose_jump.png sit_img=img/frog_rose_sit.png place=object_004
+frog jump_img=img/frog_black_red_jump.png sit_img=img/frog_black_red_sit.png place=object_005
+frog jump_img=img/frog_blue_orange_jump.png sit_img=img/frog_blue_orange_sit.png place=object_011
+frog jump_img=img/frog_green_jump.png sit_img=img/frog_green_sit.png place=object_000
