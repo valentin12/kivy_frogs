@@ -397,50 +397,55 @@
         top: app.window.height - dp(5)
         x: dp(90)
 
-    Button:
+    Image:
         id: help_btn
         top: live2.y - dp(10)
         x: dp(10)
         size: dp(40), dp(40)
-        background_normal: "img/icons/help.jpg"
-        background_down: "img/icons/help.jpg"
-        on_press: app.help_popup.open()
+        allow_stretch: True
+        keep_ratio: False
+        source: "img/icons/help.jpg"
+        on_touch_down: if self.collide_point(*args[1].pos): app.help_popup.open()
 
-    Button:
+    Image:
         id: level_btn
         top: help_btn.y - dp(10)
         x: dp(10)
         size: dp(40), dp(40)
-        background_normal: "img/icons/level.jpg"
-        background_down: "img/icons/level.jpg"
-        on_press: app.level_popup.open()
+        allow_stretch: True
+        keep_ratio: False
+        source: "img/icons/level.jpg"
+        on_touch_down: if self.collide_point(*args[1].pos): app.level_popup.open()
 
-    Button:
+    Image:
         id: settings_btn
         top: level_btn.y - dp(10)
         x: dp(10)
         size: dp(40), dp(40)
-        background_normal: "img/icons/settings.jpg"
-        background_down: "img/icons/settings.jpg"
-        on_press: app.open_settings()
+        allow_stretch: True
+        keep_ratio: False
+        source: "img/icons/settings.jpg"
+        on_touch_down: if self.collide_point(*args[1].pos): app.open_settings()
 
-    Button:
+    Image:
         id: level_editor_btn
         top: settings_btn.y - dp(10)
         x: dp(10)
         size: dp(40), dp(40)
-        background_normal: "img/icons/editor.jpg"
-        background_down: "img/icons/editor.jpg"
-        on_press: app.open_level_editor()
+        allow_stretch: True
+        keep_ratio: False
+        source: "img/icons/editor.jpg"
+        on_touch_down: if self.collide_point(*args[1].pos): app.open_level_editor()
 
-    Button:
+    Image:
         id: toggle_minimap_btn
         top: level_editor_btn.y - dp(10)
         x: dp(10)
         size: dp(40), dp(40)
-        background_normal: "img/icons/map.jpg"
-        background_down: "img/icons/map.jpg"
-        on_press: root.overview.visible = not root.overview.visible
+        allow_stretch: True
+        keep_ratio: False
+        source: "img/icons/map.jpg"
+        on_touch_down: if self.collide_point(*args[1].pos): root.overview.visible = not root.overview.visible
 
     Label:
         id: energy_label

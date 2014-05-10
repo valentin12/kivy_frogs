@@ -4,12 +4,12 @@ implemented with Kivy and Python
 
 Kivy
 ----
-This program is based on the Kivy engine - http://kivy.org
-You need a running installation to use it on your PC. The installation guide can be found under http://kivy.org/docs/installation/installation.html
+This program is based on the Kivy engine - http://kivy.org.
+You need a running installation to use it on your PC. The installation guide can be found under http://kivy.org/docs/installation/installation.html.
 
 The game
 --------
-You are playing a black-blue frog, which wants to come to the other side of the pond. For that, it has to catch flys, jump on water lilys and buttons and do different exercises. But he isn't the only one on the lake. Other frogs are blocking his way. They must be jumped to clear the way.
+You are playing a orange-blue frog, which wants to come to the other side of the pond. For that, it has to catch flys, jump on water lilys and buttons and do different exercises. But he isn't the only one on the lake. Other frogs are blocking his way. They must be jumped to clear the way.
 
 The name of the game
 --------------------
