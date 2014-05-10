@@ -14,5 +14,5 @@ math pos=3,5 id=object_000 count=6 orientation=horizontal
 end pos=5,6 id=end 
 start pos=5,0 id=start 
 frog id=player jump_img=img/frog_orange_blue_jump.png sit_img=img/frog_orange_blue_sit.png player=True place=start
-frog jump_img=img/frog_green_jump.png sit_img=img/frog_green_sit.png place=object_020
-frog jump_img=img/frog_green_jump.png sit_img=img/frog_green_sit.png place=object_007
+frog jump_img=img/frog_yellow_jump.png sit_img=img/frog_yellow_sit.png place=object_020
+frog jump_img=img/frog_rose_jump.png sit_img=img/frog_rose_sit.png place=object_007

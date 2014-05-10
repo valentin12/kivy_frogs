@@ -119,7 +119,7 @@ class FrogApp(App):
         self.help_popup.bind(on_dismiss=self.continue_game)
         # popup to display about
         self.about_popup = Popup(title="About",
-                                attach_to=self.game)
+                                 attach_to=self.game)
         self.about_popup.content = AboutPopup()
         self.about_popup.bind(on_touch_down=self.about_popup.dismiss)
         self.about_popup.bind(on_open=self.pause_game)
@@ -513,6 +513,7 @@ class SwitchLily(WaterLily):
         self.appearing = False
         self.free = True
         self.scatter.scale = 1
+        self.pressed = False
         self.not_pressed_img = "img/lily_switch_not_pressed.png"
         self.pressed_img = "img/lily_switch_pressed.png"
         if self.controlled:

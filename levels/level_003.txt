@@ -1,11 +1,11 @@
-level boats=1 size=6,6 flys=4
-start pos=3,0
-end pos=3,5
-switchlily pos=3,1 controlled=controlled
-waterlily id=controlled pos=4,2
-stonelily id=lily pos=3,2
-stonelily id=lily_001 pos=5,2
-waterlily pos=3,3
-waterlily pos=3,4
-frog place=start player=True sit_img=img/frog_orange_blue_sit.png jump_img=img/frog_orange_blue_jump.png
-frog sit_img=img/frog_green_sit.png jump_img=img/frog_green_jump.png place=lily
+level boats=1 flys=4 energy=4 size=4,6
+stonelily pos=3,2 id=object_011 
+stonelily pos=1,2 id=object_009 
+switchlily pos=1,1 id=object_008 controlled=object_005
+waterlily pos=1,4 id=object_007 
+waterlily pos=1,3 id=object_006 
+waterlily pos=2,2 id=object_005 
+end pos=1,5 id=end 
+start pos=1,0 id=start 
+frog id=player jump_img=img/frog_orange_blue_jump.png sit_img=img/frog_orange_blue_sit.png player=True place=start
+frog jump_img=img/frog_black_turquoise_jump.png sit_img=img/frog_black_turquoise_sit.png place=object_009

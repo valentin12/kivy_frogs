@@ -1,11 +1,10 @@
-level boats=1 flys=4 energy=4 size=5,7
-waterlily pos=2,6 id=object_006 
-waterlily pos=2,5 id=object_005 
-waterlily pos=2,4 id=object_004 
-math pos=2,2 id=object_003 count=5 orientation=horizontal 
-waterlily pos=2,3 id=object_002 
-stonelily pos=2,1 id=object_001 
-stonelily pos=3,1 id=object_000 
-end pos=4,6 id=end 
-start pos=4,0 id=start 
+level boats=1 flys=4 energy=4 size=3,6
+waterlily pos=1,4 id=object_004 
+waterlily pos=1,3 id=object_003 
+math pos=1,2 id=object_002 count=5 orientation=horizontal 
+stonelily pos=1,1 id=object_001 
+stonelily pos=2,1 id=object_000 
+end pos=2,5 id=end 
+start pos=2,0 id=start 
 frog id=player jump_img=img/frog_orange_blue_jump.png sit_img=img/frog_orange_blue_sit.png player=True place=start
+frog jump_img=img/frog_blue_orange_jump.png sit_img=img/frog_blue_orange_sit.png place=object_001
