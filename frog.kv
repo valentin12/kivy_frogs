@@ -448,9 +448,17 @@
         top: app.window.height - dp(5)
         x: dp(90)
 
+    Label:
+        id: energy_label
+        size_hint: None, None
+        top: live2.y - dp(10)
+        x: dp(10)
+        text: "Energy: " + str(game.energy)
+        height: self.font_size
+
     Image:
         id: help_btn
-        top: live2.y - dp(10)
+        top: energy_label.y - dp(10)
         x: dp(10)
         size: dp(40), dp(40)
         allow_stretch: True
@@ -507,13 +515,6 @@
         keep_ratio: False
         source: "img/icons/map.jpg"
         on_touch_down: if self.collide_point(*args[1].pos): root.overview.visible = not root.overview.visible
-
-    Label:
-        id: energy_label
-        size_hint: None, None
-        top: app.window.height - dp(5)
-        right: app.window.width
-        text: "Energy: " + str(game.energy)
 
     Label:
         id: status

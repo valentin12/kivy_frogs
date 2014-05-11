@@ -1,31 +1,38 @@
 level boats=1 flys=4 energy=4 size=15,10
-stonelily pos=2,4 id=object_040 
+switchlily pos=1,4 id=object_008 controlled=object_012
+stonelily pos=0,-2 id=object_047 
+color pos=5,9 id=object_015 count=6 orientation=horizontal 
+math pos=0,-4 id=object_045 count=5 orientation=horizontal 
+interval pos=4,5 id=object_013 count=4 orientation=vertical 
+math pos=0,-1 id=object_043 count=5 orientation=horizontal 
+waterlily pos=11,7 id=object_042 
+stonelily pos=-4,-3 id=object_033 
+roman pos=6,7 id=object_006 count=4 orientation=horizontal 
+math pos=-1,-2 id=object_031 count=5 orientation=horizontal 
+switchlily pos=11,9 id=object_035 controlled=object_018
+switchlily pos=14,9 id=object_026 controlled=object_038
+switchlily pos=2,2 id=object_009 controlled=object_010
+switchlily pos=11,2 id=object_005 controlled=object_042
+switchlily pos=1,6 id=object_028 controlled=object_030
+color pos=12,2 id=object_029 count=4 orientation=vertical 
+math pos=3,1 id=object_003 count=4 orientation=horizontal 
+stonelily pos=12,9 id=object_036 
+stonelily pos=14,7 id=object_023 
+stonelily pos=4,9 id=object_014 
+stonelily pos=4,4 id=object_011 
+stonelily pos=3,2 id=object_007 
+stonelily pos=6,2 id=object_001 
+stonelily pos=1,2 id=object_026 
+stonelily pos=10,7 id=object_029 
 waterlily pos=12,6 id=object_039 
 waterlily pos=12,8 id=object_038 
-stonelily pos=12,9 id=object_036 
-switchlily pos=11,9 id=object_035 controlled=object_018
-color pos=12,2 id=object_029 count=3 orientation=vertical 
 waterlily pos=12,7 id=object_027 
-switchlily pos=14,9 id=object_026 controlled=object_038
-stonelily pos=14,7 id=object_023 
 waterlily pos=14,8 id=object_018 
-color pos=6,9 id=object_015 count=5 orientation=horizontal 
-stonelily pos=5,9 id=object_014 
-interval pos=4,5 id=object_013 count=5 orientation=vertical 
 waterlily pos=3,3 id=object_012 
-stonelily pos=4,4 id=object_011 
 waterlily pos=2,3 id=object_010 
-switchlily pos=2,2 id=object_009 controlled=object_010
-switchlily pos=1,4 id=object_008 controlled=object_012
-stonelily pos=3,2 id=object_007 
-roman pos=6,7 id=object_006 count=4 orientation=horizontal 
-switchlily pos=11,2 id=object_005 controlled=object_004
-waterlily pos=6,6 id=object_004 
-math pos=3,1 id=object_003 count=4 orientation=horizontal 
-switchlily pos=9,6 id=object_002 controlled=object_000
-stonelily pos=6,2 id=object_001 
-waterlily pos=6,4 id=object_000 
-end pos=6,5 id=end 
+waterlily pos=7,6 id=object_004 
+waterlily pos=1,5 id=object_027 
+end pos=7,5 id=end 
 start pos=6,3 id=start 
 frog id=player jump_img=img/frog_orange_blue_jump.png sit_img=img/frog_orange_blue_sit.png player=True place=start
 frog jump_img=img/frog_black_yellow_jump.png sit_img=img/frog_black_yellow_sit.png place=object_023

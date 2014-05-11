@@ -102,6 +102,14 @@
                 size_hint: .9, None
                 x: (options_acc.width - self.width) / 2
                 on_press: app.repeat_level=True; app.editor.export_level("levels/tmp_level.txt"); app.load_custom_level("levels/tmp_level.txt"); app.close_level_editor()
+            Button:
+                id: open
+                top: test.y - root.offset
+                text: "Load Level"
+                height: dp(40)
+                size_hint: .9, None
+                x: (options_acc.width - self.width) / 2
+                on_press: app.editor.load_dialog.open()
     AccordionItem:
         accordion: root
         title: "Level Settings"
@@ -203,6 +211,9 @@
     tp: tp_input.text
     obj: self.obj
     l: l
+    tp_input: tp_input
+    count_input: count_input
+    orient_input: orient_input
     RelativeLayout:
         id: l
         pos: 0, 0
@@ -287,6 +298,7 @@
     last_controlled: None
     controlled_img: "img/water_lily_controlled.png"
     obj: self.obj
+    select_btn: select_btn
     SelectButton:
         id: select_btn
         height: dp(40)
@@ -313,6 +325,7 @@
 <FrogOptions>
     obj: self.obj
     color: color_input.text
+    color_input: color_input
     Label:
         id: color_label
         width: root.width
@@ -431,3 +444,26 @@
             Rectangle:
                 size: dp(80), dp(80)
                 pos: 0, root.height - dp(80)
+
+
+<LoadDialog>
+    app: app
+    title: "Choose a file"
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser
+            path: "levels/"
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Load"
+                on_release: root.load(filechooser.path, filechooser.selection)

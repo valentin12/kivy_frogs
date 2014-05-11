@@ -25,9 +25,12 @@ def find_custom_levels():
 
 
 def parse_level(filepath):
-    f = open(filepath)
-    text = f.read()
-    f.close()
+    try:
+        f = open(filepath)
+        text = f.read()
+        f.close()
+    except IOError:
+        return
     level = {}
     for line in text.split("\n"):
         opts = [opt.strip() for opt in line.split(" ")]
@@ -44,12 +47,6 @@ def parse_level(filepath):
 
 
 def build_level(filename, app, root):
-    def calculate_point(pos, distance):
-        x, y = [float(v) for v in pos]
-        x *= distance
-        y *= distance
-        return x, y
-
     # reset game to standard settings
     root.game_scatter.before_jumpline.clear_widgets()
     root.game_scatter.jumplines.clear_widgets()
@@ -392,3 +389,10 @@ def build_level(filename, app, root):
             root.frogs.append(f)
             root.game_scatter.after_jumplines.add_widget(f)
     return root
+
+
+def calculate_point(pos, distance):
+    x, y = [float(v) for v in pos]
+    x *= distance
+    y *= distance
+    return x, y

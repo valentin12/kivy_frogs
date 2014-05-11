@@ -4,6 +4,7 @@ from kivy.uix.scatter import Scatter
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
 from kivy.uix.relativelayout import RelativeLayout
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
@@ -11,6 +12,8 @@ from kivy.uix.accordion import Accordion
 from kivy.properties import ObjectProperty, NumericProperty,\
     OptionProperty, StringProperty
 from os.path import isfile
+
+import level_parser
 
 from kivy.lang import Builder
 
@@ -23,6 +26,7 @@ class LevelEditorWidget(Widget):
         self.export_popup = Popup(title="Export ...",
                                   content=ExportPopup(),
                                   size_hint=(.3, .3))
+        self.load_dialog = LoadDialog()
 
     def overwrite_level(self):
         if self.last_export:
@@ -89,6 +93,148 @@ class LevelEditorWidget(Widget):
         f.write(out)
         f.close()
 
+    def load_level(self, path):
+        if not path[-13: -7] == "level_"\
+           and not path[-15: -9] == "level_":
+            self.last_export = path
+            self.export_popup.content.overwrite_btn.disabled = False
+        else:
+            self.last_export = ""
+            self.export_popup.content.overwrite_btn.disabled = True
+        level = level_parser.parse_level(path)
+        self.level.build_standard()
+        # load level settings
+        distance = dp(100)
+        l = level["level"][0]
+        if "energy" in l:
+            self.sidebar.level_settings.energy_count.text = l["energy"]
+        if "flys" in l:
+            self.sidebar.level_settings.flys_count.text = l["flys"]
+        if "boats" in l:
+            self.sidebar.level_settings.boats_count.text = l["boats"]
+        # start and end base
+        if "start" in level:
+            if "pos" in level["start"][0]:
+                x, y = level_parser.calculate_point(
+                    level["start"][0]["pos"].split(","), distance)
+                self.level.start.center_x = x
+                self.level.start.y = y
+        if "end" in level:
+            if "pos" in level["end"][0]:
+                x, y = level_parser.calculate_point(
+                    level["end"][0]["pos"].split(","), distance)
+                self.level.end.center_x = x
+                self.level.end.y = y
+        if "waterlily" in level:
+            for i in range(len(level["waterlily"])):
+                lily = level["waterlily"][i]
+                l = WaterLilyPH()
+                l.moved = True
+                if "id" in lily:
+                    l.id = lily["id"]
+                if "pos" in lily:
+                    x, y = level_parser.calculate_point(
+                        lily["pos"].split(","), distance)
+                    l.center_x = x
+                    l.y = y
+                self.level.add_widget(l)
+        if "stonelily" in level:
+            for i in range(len(level["stonelily"])):
+                lily = level["stonelily"][i]
+                l = StoneLilyPH()
+                l.moved = True
+                if "id" in lily:
+                    l.id = lily["id"]
+                if "pos" in lily:
+                    x, y = level_parser.calculate_point(
+                        lily["pos"].split(","), distance)
+                    l.center_x = x
+                    l.y = y
+                self.level.add_widget(l)
+        # the exercises
+        exs = []
+        if "math" in level:
+            exs.append("math")
+        if "interval" in level:
+            exs.append("interval")
+        if "color" in level:
+            exs.append("color")
+        if "roman" in level:
+            exs.append("roman")
+        for ex in exs:
+            for e in level[ex]:
+                # exercise widget
+                ew = ExercisePH()
+                if "id" in e:
+                    ew.id = e["id"]
+                if "pos" in e:
+                    x, y = level_parser.calculate_point(
+                        e["pos"].split(","), distance)
+                    ew.center_x = x
+                    ew.y = y
+                if ew.options:
+                    ew.options.tp_input.text = ex.capitalize()
+                    if "count" in e:
+                        ew.options.count_input.text = e["count"]
+                    if "orientation" in e:
+                        ew.options.orient_input.text = e[
+                            "orientation"].capitalize()
+                self.level.add_widget(ew)
+        if "switchlily" in level:
+            for lily in level["switchlily"]:
+                l = SwitchLilyPH()
+                if "id" in lily:
+                    l.id = lily["id"]
+                if "pos" in lily:
+                    x, y = level_parser.calculate_point(
+                        lily["pos"].split(","), distance)
+                    l.center_x = x
+                    l.y = y
+                if "controlled" in lily:
+                    if l.options:
+                        for o in self.level.children:
+                            if o.id == lily["controlled"]:
+                                l.options.select_btn.selected = o
+                                break
+                self.level.add_widget(l)
+        c_dict = {"img/frog_green_sit.png": "green",
+                  "img/frog_yellow_sit.png": "yellow",
+                  "img/frog_black_blue_sit.png": "darkblue-black",
+                  "img/frog_black_light_blue_sit.png": "lightblue-black",
+                  "img/frog_black_red_sit.png": "red-black",
+                  "img/frog_black_turquoise_sit.png": "turquoise-black",
+                  "img/frog_rose_sit.png": "rose",
+                  "img/frog_black_yellow_sit.png": "yellow-black",
+                  "img/frog_blue_orange_sit.png": "blue-orange"}
+        if "frog" in level:
+            for frog in level["frog"]:
+                if "player" in frog:
+                    if frog["player"] == "True":
+                        continue
+                f = FrogPH()
+                if "id" in frog:
+                    f.id = frog["id"]
+                if "place" in frog:
+                    f.place = frog["place"]
+                    for o in self.level.children:
+                        if o.id == frog["place"]:
+                            o.bind(pos=f.on_parent_pos)
+                            f.center = o.center
+                            break
+                    else:
+                        continue
+                else:
+                    continue
+                if "sit_img" in frog:
+                    try:
+                        if f.options:
+                            f.options.color_input.text = c_dict[
+                                frog["sit_img"]].capitalize()
+                    except KeyError:
+                        pass
+                self.level.add_widget(f)
+            
+
     def next_level_name(self):
         i = 1
         LOOP = True
@@ -138,8 +284,12 @@ class LevelScatter(Scatter):
                             StoneLilyPH,
                             SwitchLilyPH,
                             ExercisePH]:
-            widget.id = "object_%03d" %\
-                self.app.editor.object_count
+            if not widget.id:
+                while "object_%03d" % self.app.editor.object_count\
+                      in [c.id for c in self.children]:
+                    self.app.editor.object_count += 1
+                widget.id = "object_%03d" %\
+                            self.app.editor.object_count
             self.app.editor.object_count += 1
         super(LevelScatter, self).add_widget(widget, index)
 
@@ -482,3 +632,13 @@ class SelectButton(Button):
                     return True
             self.selected = None
         return super(SelectButton, self).on_touch_up(touch)
+
+
+class LoadDialog(Popup):
+    def cancel(self):
+        self.dismiss()
+
+    def load(self, path, selection):
+        print "Load : " + str(path) + " "+ str(selection)
+        self.dismiss()
+        self.app.editor.load_level(selection[0])
