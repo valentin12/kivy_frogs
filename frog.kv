@@ -77,7 +77,8 @@
         top: title.y - dp(10)
     Label:
         id: about_me
-        text: "About me: I'm a hobby developer\nand I'm developing for Voca-Word,\n a serious games website,\ntogether with Peter Koppatz.\nOur projects can be\nfound on vocaword.org"
+        text: "About me: I'm a hobby developer\nand I'm developing for Voca-Word,\na serious games website, together\nwith Peter Koppatz.\nOur projects can befound on\nvocaword.org"
+        halign: "center"
         center_x: root.center_x
         top: vowo_icon.y - dp(10)
 
@@ -473,7 +474,7 @@
         size: dp(40), dp(40)
         allow_stretch: True
         keep_ratio: False
-        source: "img/icons/about.jpg"
+        source: "img/icons/about.png"
         on_touch_down: if self.collide_point(*args[1].pos): app.about_popup.open()
 
     Image:
@@ -493,7 +494,7 @@
         size: dp(40), dp(40)
         allow_stretch: True
         keep_ratio: False
-        source: "img/icons/settings.jpg"
+        source: "img/icons/settings.png"
         on_touch_down: if self.collide_point(*args[1].pos): app.open_settings()
 
     Image:
@@ -503,7 +504,7 @@
         size: dp(40), dp(40)
         allow_stretch: True
         keep_ratio: False
-        source: "img/icons/editor.jpg"
+        source: "img/icons/editor.png"
         on_touch_down: if self.collide_point(*args[1].pos): app.open_level_editor()
 
     Image:
@@ -513,7 +514,7 @@
         size: dp(40), dp(40)
         allow_stretch: True
         keep_ratio: False
-        source: "img/icons/map.jpg"
+        source: "img/icons/map.png"
         on_touch_down: if self.collide_point(*args[1].pos): root.overview.visible = not root.overview.visible
 
     Label:

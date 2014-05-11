@@ -218,6 +218,19 @@ class FrogApp(App):
         settings.add_json_panel("Ọpọlọ Settings",
                                 self.config, filename="frogs.json")
         self.settings = settings
+        with settings.canvas.before:
+            Color(.8, .4, .2, 1)
+            r = Rectangle(pos=settings.pos, size=settings.size)
+
+            def on_settings_pos(instance, value):
+                r.pos = value
+
+            def on_settings_size(instance, value):
+                r.size = value
+
+            self.settings.bind(pos=on_settings_pos)
+            self.settings.bind(size=on_settings_size)
+            
 
     def on_config_change(self, config, section, key, value):
         token = (section, key)
