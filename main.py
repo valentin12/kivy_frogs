@@ -112,8 +112,8 @@ class FrogApp(App):
         # popup to display help
         self.help_popup = Popup(title="Help",
                                 attach_to=self.game)
-        help_img = Image(source="img/help.png")
-        self.help_popup.content = help_img
+        # help_img = Image(source="img/help.png")
+        self.help_popup.content = HelpPopup() # help_img
         self.help_popup.bind(on_touch_down=self.help_popup.dismiss)
         self.help_popup.bind(on_open=self.pause_game)
         self.help_popup.bind(on_dismiss=self.continue_game)
@@ -1169,6 +1169,10 @@ class LevelChooserPopup(Widget):
 
 
 class AboutPopup(Widget):
+    pass
+
+
+class HelpPopup(Widget):
     pass
 
 

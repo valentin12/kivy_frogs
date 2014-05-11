@@ -22,6 +22,12 @@
 <LevelChooserPopup>
     levels: levels
     custom_levels: custom_levels
+    canvas:
+        Color:
+            rgba: .8, .4, .2, .8
+        Rectangle:
+            pos: root.pos
+            size: root.size
     GridLayout:
         id: levels
         size_hint: 1, .45
@@ -48,6 +54,12 @@
 
 <AboutPopup>
     app: app
+    canvas:
+        Color:
+            rgba: .8, .4, .2, .8
+        Rectangle:
+            pos: root.pos
+            size: root.size
     Label:
         id: title
         font_size: dp(40)
@@ -70,6 +82,19 @@
         top: vowo_icon.y - dp(10)
 
 
+<HelpPopup>
+    canvas:
+        Color:
+            rgba: .8, .4, .2, 1
+        Rectangle:
+            pos: root.pos
+            size: root.size
+    Image:
+        source: "img/help.png"
+        pos: root.pos
+        size: root.size
+
+
 <OverviewWidget>
     app: app
     screen: screen
@@ -78,6 +103,7 @@
     rect_x: 0
     rect_y: 0
     rect_pos: [self.rect_x, self.rect_y]
+    scl: 1
     visible: True
     canvas:
         Color:
@@ -89,7 +115,7 @@
             rgba: 1, 1, 1, 1 if root.visible else 0
         Line:
             width: dp(1)
-            rectangle: [root.rect_x, root.rect_y, app.window.width / 5, app.window.height / 5]
+            rectangle: [root.rect_x, root.rect_y, (app.window.width / 5) / root.scl, (app.window.height / 5) / root.scl]
     Widget:
         id: screen
         pos: root.pos
@@ -406,8 +432,9 @@
         id: overview
         width: game.preferred_size[0] / 5
         height: game.preferred_size[1] / 5
-        rect_x: -game_scatter.x / 5
-        rect_y: -game_scatter.y / 5
+        rect_x: -game_scatter.x / 5 / game_scatter.scale
+        rect_y: -game_scatter.y / 5 / game_scatter.scale
+        scl: game_scatter.scale
     Live:
         id: live
         top: app.window.height - dp(5)
