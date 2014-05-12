@@ -5,7 +5,7 @@ switchlily pos=3,9 id=object_034 controlled=object_036
 waterlily pos=2,9 id=object_031 
 color pos=1,5 id=object_029 count=4 orientation=vertical 
 stonelily pos=10,10 id=object_028 
-math pos=7,10 id=object_027 count=3 orientation=horizontal 
+form pos=7,10 id=object_027 count=3 orientation=horizontal 
 waterlily pos=10,9 id=object_026 
 waterlily pos=9,8 id=object_025 
 switchlily pos=9,2 id=object_024 controlled=object_025

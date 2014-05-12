@@ -14,7 +14,7 @@ switchlily pos=14,9 id=object_026 controlled=object_038
 switchlily pos=2,2 id=object_009 controlled=object_010
 switchlily pos=11,2 id=object_005 controlled=object_042
 switchlily pos=1,6 id=object_028 controlled=object_030
-color pos=12,2 id=object_029 count=4 orientation=vertical 
+form pos=12,2 id=object_029 count=4 orientation=vertical 
 math pos=3,1 id=object_003 count=4 orientation=horizontal 
 stonelily pos=12,9 id=object_036 
 stonelily pos=14,7 id=object_023 

@@ -83,6 +83,7 @@ class FrogApp(App):
 
     def build(self):
         self.icon = "img/icon_blue_orange.png"
+        self.title = "Ọpọlọ"
         self.levels = level_parser.find_levels()
         self.custom_levels = level_parser.find_custom_levels()
         self.level = 0
@@ -168,6 +169,7 @@ class FrogApp(App):
                     level_parser.build_level(
                         self.levels[self.level], self, self.game)
                 self.current_level = self.levels[self.level]
+                self.game.level_label.l = str(self.level + 1)
             elif self.current_level in self.custom_levels:
                 try:
                     self.current_level = self.custom_levels[
@@ -190,6 +192,7 @@ class FrogApp(App):
             self.level = level
         level_parser.build_level(
             self.levels[self.level], self, self.game)
+        self.game.level_label.l = str(self.level + 1)
         self.current_level = self.levels[self.level]
         self.repeat_level = False
 
@@ -198,6 +201,10 @@ class FrogApp(App):
             path = path.path
             self.level_popup.dismiss()
         self.current_level = path
+        if path.endswith("tmp_level.txt"):
+            self.game.level_label.l = "Test"
+        else:
+            self.game.level_label.l = "Custom"
         level_parser.build_level(path, self, self.game)
 
     def build_config(self, config):
@@ -436,7 +443,7 @@ class WaterLily(Widget):
     def on_sank(self):
         # kill all frogs on the lily
         # dont't call if sinking was canceled
-        if self.scatter.size > .1:
+        if self.scatter.scale > .1:
             return
         reappear_after = 3
         for frog in self.app.game.frogs:
@@ -986,6 +993,14 @@ class EllipseWidget(Widget):
     pass
 
 
+class TriangleWidget(Widget):
+    pass
+
+
+class RectangleWidget(Widget):
+    pass
+
+
 class ColorWidget(ExerciseWidget):
     base_colors = [[1, 0, 0], [1, 1, 0], [0, 0, 1]]
     real_colors = {str([1., .5, 0.]): [1, .5, 0],
@@ -1103,6 +1118,90 @@ class RomanWidget(ExerciseWidget):
             self.lilys.append(
                 MoveableWaterLily(text=n, value=n,
                                   solution=self.solution))
+        shuffle(self.lilys)
+        for i in range(len(self.lilys)):
+            self.lily_widget.add_widget(self.lilys[i])
+            if self.orientation == "horizontal":
+                self.lilys[i].pos = (self.pos[0] + i * self.distance,
+                                     self.pos[1])
+            else:
+                self.lilys[i].pos = (self.pos[0] + dp(15),
+                                     self.pos[1] + i * self.distance)
+        Clock.unschedule(self.move)
+        Clock.schedule_interval(self.move, 1 / 30)
+
+
+class FormWidget(ExerciseWidget):
+    forms = ["Circle", "Rectangle", "Triangle", "Square"]
+    formulas = {"Circle": ["U=2*r*π",
+                           "A=r²*π"],
+                "Rectangle": ["A=a*b",
+                              "U=2*(a+b)",
+                              "D=√(a² + b²)"],
+                "Square": ["A=a²",
+                           "U=4a",
+                           "D=2*√2"],
+                "Triangle": ["A=(a*ha)/2"]}
+
+    def __init__(self, **kwargs):
+        super(FormWidget, self).__init__(**kwargs)
+
+    def on_pos(self, instance, pos):
+        self.setup()
+
+    def setup(self, force=False):
+        if self.initialized and not force:
+            for i in range(len(self.lilys)):
+                self.lilys[i].pos = (self.pos[0] + i * self.distance,
+                                     self.pos[1])
+            return
+        else:
+            for lily in self.lilys:
+                self.lily_widget.remove_widget(lily)
+            self.lilys = []
+            self.left_of_label.clear_widgets()
+            self.right_of_label.clear_widgets()
+        self.initialized = True
+        choices = self.formulas.keys()[:]
+        self.solution = choices.pop(randint(0, len(choices) - 1))
+        self.formula = choice(self.formulas[self.solution])
+        self.label.text = self.formula
+        self.label_width = dp(100)
+        # other posibilities
+        self.lilys = [MoveableWaterLily()]
+        self.lilys[0].solution = self.solution
+        self.lilys[0].text = ""
+        self.lilys[0].value = self.solution
+        for i in range(self.count - 1):
+            try:
+                n = choices.pop(randint(0, len(choices) - 1))
+            except ValueError:
+                n = choice(self.formulas.keys())
+            self.lilys.append(
+                MoveableWaterLily(text="",
+                                  value=n,
+                                  solution=self.solution))
+        for lily in self.lilys:
+            if lily.value == "Circle":
+                lily.custom.add_widget(
+                    EllipseWidget(rgb=[1, 1, 1],
+                                  center=lily.custom.center,
+                                  size=(dp(20), dp(20))))
+            elif lily.value == "Rectangle":
+                lily.custom.add_widget(
+                    RectangleWidget(rgb=[1, 1, 1],
+                                    center=lily.custom.center,
+                                    size=(dp(20), dp(30))))
+            elif lily.value == "Square":
+                lily.custom.add_widget(
+                    RectangleWidget(rgb=[1, 1, 1],
+                                    center=lily.custom.center,
+                                    size=(dp(20), dp(20))))
+            elif lily.value == "Triangle":
+                lily.custom.add_widget(
+                    TriangleWidget(rgb=[1, 1, 1],
+                                    center=lily.custom.center,
+                                    size=(dp(20), dp(20))))
         shuffle(self.lilys)
         for i in range(len(self.lilys)):
             self.lily_widget.add_widget(self.lilys[i])

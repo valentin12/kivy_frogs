@@ -1,6 +1,6 @@
 level boats=1 flys=4 energy=4 size=4,6
 waterlily pos=3,1 id=object_004 
-math pos=1,2 id=object_003 count=5 orientation=horizontal 
+form pos=1,2 id=object_003 count=5 orientation=horizontal 
 switchlily pos=3,3 id=object_002 controlled=object_004
 waterlily pos=2,3 id=object_001 
 stonelily pos=3,4 id=object_000 

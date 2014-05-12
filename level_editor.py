@@ -161,6 +161,8 @@ class LevelEditorWidget(Widget):
             exs.append("color")
         if "roman" in level:
             exs.append("roman")
+        if "form" in level:
+            exs.append("form")
         for ex in exs:
             for e in level[ex]:
                 # exercise widget

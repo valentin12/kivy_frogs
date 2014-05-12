@@ -307,6 +307,25 @@
         on_pos: for c in self.children: c.center = custom.to_parent(*custom.center)
 
 
+<RectangleWidget>
+    rgb: [1, 1, 1]
+    canvas:
+        Color:
+            rgb: self.rgb if self.rgb else [1, 1, 1]
+        Rectangle:
+            size: root.size
+            pos: root.pos
+
+
+<TriangleWidget>
+    rgb: [1, 1, 1]
+    canvas:
+        Color:
+            rgb: self.rgb if self.rgb else [1, 1, 1]
+        Triangle:
+            points: [root.pos[0], root.pos[1], root.pos[0] + root.width, root.pos[1], root.pos[0] + root.width / 2, root.pos[1] + root.height]
+
+
 <EllipseWidget>
     rgb: self.rgb
     canvas:
@@ -388,6 +407,7 @@
     end: end
     status: status
     energy_label: energy_label
+    level_label: level_label
     game_scatter: game_scatter
     overview: overview
     store: []
@@ -471,9 +491,18 @@
         text: "Energy: " + str(game.energy)
         height: self.font_size
 
+    Label:
+        id: level_label
+        size_hint: None, None
+        top: energy_label.y - dp(10)
+        x: dp(10)
+        text: "Level: " + self.l
+        l: "1"
+        height: self.font_size
+
     Image:
         id: help_btn
-        top: energy_label.y - dp(10)
+        top: level_label.y - dp(10)
         x: dp(10)
         size: dp(40), dp(40)
         allow_stretch: True

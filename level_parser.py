@@ -1,7 +1,7 @@
 from kivy.uix.widget import Widget
 from main import GameWidget, WaterLily, StoneLily,\
     MathWidget, Frog, JumpLine, Fly, Boat, SwitchLily, IntervalWidget,\
-    ColorWidget, RomanWidget
+    ColorWidget, RomanWidget, FormWidget
 from kivy.metrics import dp
 from os import listdir, getcwd
 
@@ -293,6 +293,38 @@ def build_level(filename, app, root):
                 i.speed = 1
             if "orientation" in roman:
                 i.orientation = roman["orientation"]
+            else:
+                i.orientation = "horizontal"
+            i.setup(force=True)
+            root.game_scatter.before_jumpline.add_widget(i)
+            root.lily_provider.append(i)
+    if "form" in level:
+        for i in range(len(level["form"])):
+            form = level["form"][i]
+            try:
+                i = [iv for iv in root.store if type(iv) == FormWidget][i]
+            except IndexError:
+                i = FormWidget()
+                root.store.append(i)
+            if "id" in form:
+                i.id = form["id"]
+                if i.id not in root.objects:
+                    root.objects[i.id] = i
+            if "pos" in form:
+                x, y = calculate_point(
+                    form["pos"].split(","), distance)
+                i.center_x = x
+                i.y = y
+            if "count" in form:
+                i.count = int(form["count"])
+            else:
+                i.count = 5
+            if "speed" in form:
+                i.speed = float(form["speed"])
+            else:
+                i.speed = 1
+            if "orientation" in form:
+                i.orientation = form["orientation"]
             else:
                 i.orientation = "horizontal"
             i.setup(force=True)
