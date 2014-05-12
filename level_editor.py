@@ -235,7 +235,6 @@ class LevelEditorWidget(Widget):
                     except KeyError:
                         pass
                 self.level.add_widget(f)
-            
 
     def next_level_name(self):
         i = 1
@@ -641,6 +640,5 @@ class LoadDialog(Popup):
         self.dismiss()
 
     def load(self, path, selection):
-        print "Load : " + str(path) + " "+ str(selection)
         self.dismiss()
         self.app.editor.load_level(selection[0])

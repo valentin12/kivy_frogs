@@ -113,8 +113,7 @@ class FrogApp(App):
         # popup to display help
         self.help_popup = Popup(title="Help",
                                 attach_to=self.game)
-        # help_img = Image(source="img/help.png")
-        self.help_popup.content = HelpPopup() # help_img
+        self.help_popup.content = HelpPopup()
         self.help_popup.bind(on_touch_down=self.help_popup.dismiss)
         self.help_popup.bind(on_open=self.pause_game)
         self.help_popup.bind(on_dismiss=self.continue_game)
@@ -237,7 +236,6 @@ class FrogApp(App):
 
             self.settings.bind(pos=on_settings_pos)
             self.settings.bind(size=on_settings_size)
-            
 
     def on_config_change(self, config, section, key, value):
         token = (section, key)
@@ -578,12 +576,15 @@ class JumpLine(Widget):
         start = Vector((self.x1, self.y1))
         end = Vector(self.raw_end)
         distance = start.distance(end)
-        if distance > self.max:
+        if abs(distance) > self.max:
             dir = Vector((
                 start.x - end.x, start.y - end.y))
             end = start - dir * self.max / distance
             self.x2 = end[0]
             self.y2 = end[1]
+        else:
+            self.x2 = self.raw_end[0]
+            self.y2 = self.raw_end[1]
 
 
 class Frog(Widget):
@@ -1200,8 +1201,8 @@ class FormWidget(ExerciseWidget):
             elif lily.value == "Triangle":
                 lily.custom.add_widget(
                     TriangleWidget(rgb=[0, 1, 0],
-                                    center=lily.custom.center,
-                                    size=(dp(20), dp(20))))
+                                   center=lily.custom.center,
+                                   size=(dp(20), dp(20))))
         shuffle(self.lilys)
         for i in range(len(self.lilys)):
             self.lily_widget.add_widget(self.lilys[i])
