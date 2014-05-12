@@ -435,6 +435,9 @@ class WaterLily(Widget):
 
     def on_sank(self):
         # kill all frogs on the lily
+        # dont't call if sinking was canceled
+        if self.scatter.size > .1:
+            return
         reappear_after = 3
         for frog in self.app.game.frogs:
             if frog.place == self:
@@ -493,7 +496,8 @@ class SwitchLily(WaterLily):
         if self.controlled:
             if value:
                 self.controlled.appear(None)
-                self.app.sounds["mechanical_appear"].play()
+                if self.controlled.scatter.scale < .1:
+                    self.app.sounds["mechanical_appear"].play()
             else:
                 self.controlled.force_sinking()
 
@@ -510,7 +514,8 @@ class SwitchLily(WaterLily):
         self.controlled.bind(free=self.on_controlled_free_changed)
         if self.pressed:
             self.controlled.appear(None)
-            self.app.sounds["mechanical_appear"].play()
+            if self.controlled.scatter.scale < .1:
+                self.app.sounds["mechanical_appear"].play()
         else:
             self.controlled.force_sinking()
 

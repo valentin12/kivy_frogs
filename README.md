@@ -1,6 +1,6 @@
 **Ọpọlọ**
 ==========
-implemented with Kivy and Python
+Implemented with Kivy and Python
 
 Kivy
 ----
@@ -19,10 +19,17 @@ Credits
 -------
 * All sounds are made by me (Valentin Pratz) and Peter Koppatz.
 * The images are mostly self made with Blender (http://blender.org). The models can be found in the models/ folder
+* Used programs
+  * Blender: http://blender.org
+  * Gimp: http://www.gimp.org
+  * OpenOffice/LibreOffice: http://www.openoffice.org / http://www.libreoffice.org/
+  * Inkscape: http://www.inkscape.org
+  * Audacity: http://audacity.sourceforge.net
+  * GNU Emacs: http://www.gnu.org/software/emacs/
 
 Technical information
 ---------------------
-The game is designed to run on all sizes of devices, but the performance on Android is very worse. (Download: https://play.google.com/store/apps/details?id=org.vocaword.frogs). Maybe in new versions the problem will get fixed.
+The game is designed to run on all sizes of devices, but you need a new Android version and much memory to get a good performance on Android. (Download: https://play.google.com/store/apps/details?id=org.vocaword.frogs).
 
 More information
 ----------------
