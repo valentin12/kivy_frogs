@@ -1184,22 +1184,22 @@ class FormWidget(ExerciseWidget):
         for lily in self.lilys:
             if lily.value == "Circle":
                 lily.custom.add_widget(
-                    EllipseWidget(rgb=[1, 1, 1],
+                    EllipseWidget(rgb=[1, 0, 0],
                                   center=lily.custom.center,
                                   size=(dp(20), dp(20))))
             elif lily.value == "Rectangle":
                 lily.custom.add_widget(
-                    RectangleWidget(rgb=[1, 1, 1],
+                    RectangleWidget(rgb=[1, 1, 0],
                                     center=lily.custom.center,
                                     size=(dp(20), dp(30))))
             elif lily.value == "Square":
                 lily.custom.add_widget(
-                    RectangleWidget(rgb=[1, 1, 1],
+                    RectangleWidget(rgb=[0, 0, 1],
                                     center=lily.custom.center,
                                     size=(dp(20), dp(20))))
             elif lily.value == "Triangle":
                 lily.custom.add_widget(
-                    TriangleWidget(rgb=[1, 1, 1],
+                    TriangleWidget(rgb=[0, 1, 0],
                                     center=lily.custom.center,
                                     size=(dp(20), dp(20))))
         shuffle(self.lilys)

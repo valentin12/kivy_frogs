@@ -85,7 +85,7 @@
         top: name.y - dp(10)
     Label:
         id: about_me
-        text: "About me: I'm a hobby developer\nand I'm developing for Voca-Word,\na serious games website, together\nwith Peter Koppatz.\nOur projects can befound on\nvocaword.org"
+        text: "About me: I'm a hobby developer\nand I'm developing for Voca-Word,\na serious games website, together\nwith Peter Koppatz.\nOur projects can be found on\nvocaword.org"
         halign: "center"
         center_x: root.center_x
         top: vowo_icon.y - dp(10)
@@ -308,7 +308,7 @@
 
 
 <RectangleWidget>
-    rgb: [1, 1, 1]
+    rgb: self.rgb
     canvas:
         Color:
             rgb: self.rgb if self.rgb else [1, 1, 1]
@@ -318,7 +318,7 @@
 
 
 <TriangleWidget>
-    rgb: [1, 1, 1]
+    rgb: self.rgb
     canvas:
         Color:
             rgb: self.rgb if self.rgb else [1, 1, 1]
