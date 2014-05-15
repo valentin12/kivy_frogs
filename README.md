@@ -1,6 +1,7 @@
 **Ọpọlọ**
 ==========
 Implemented with Kivy and Python
+http://www.youtube.com/watch?v=SXfymLO-IYI
 
 Kivy
 ----
