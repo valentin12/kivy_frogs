@@ -1,9 +1,12 @@
 **Ọpọlọ**
 ==========
-Implemented with Kivy and Python. 
+Implemented with Kivy and Python.
+
 The game is my entry for the Kivy Programming Contest #2(http://kivy.org/#contest).
 
-http://www.youtube.com/watch?v=SXfymLO-IYI
+http://www.youtube.com/watch?v=BDImNh5m3As
+
+www.youtube.com/watch?v=yzSk5PBzjMc
 
 Kivy
 ----
