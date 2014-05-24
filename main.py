@@ -33,7 +33,7 @@ from random import randint
 from random import random
 from random import choice
 from random import shuffle
-from locale import getdefaultlocale
+import locale
 import os.path
 
 import level_parser
@@ -1220,7 +1220,11 @@ class ChemistryWidget(ExerciseWidget):
     def __init__(self, **kwargs):
         super(ChemistryWidget, self).__init__(**kwargs)
         self.elements = {}
-        l = getdefaultlocale()[0]
+        l = locale.getdefaultlocale()[0]
+        if not l:
+            locale.setlocale(locale.LC_ALL, '')
+            l = locale.getlocale()[0]
+        l = l if l else "en_GB"
         print l
         p = "data/chemistry_symbols_{}.txt".format(l[:2].lower())
         try:
