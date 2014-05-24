@@ -1222,7 +1222,7 @@ class ChemistryWidget(ExerciseWidget):
         self.elements = {}
         l = getdefaultlocale()[0]
         print l
-        p = "data/chemistry_symbols_{}.txt".format(l[0])
+        p = "data/chemistry_symbols_{}.txt".format(l[:2].lower())
         try:
             if os.path.isfile(p):
                 with open(p) as f:
