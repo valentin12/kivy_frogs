@@ -1,0 +1,17 @@
+Wasserstoff H
+Helium He
+Kohlenstoff C
+Stickstoff N
+Sauerstoff O
+Natrium Na
+Aluminium Al
+Phosphor P
+Schwefel S
+Chlor Cl
+Calcium Ca
+Eisen Fe
+Kupfer Cu
+Zink Zn
+Silber Ag
+Gold Au
+Quecksilber Hg

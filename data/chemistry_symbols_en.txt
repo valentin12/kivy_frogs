@@ -1,0 +1,17 @@
+Hydrogen H
+Helium He
+Carbon C
+Nitrogen N
+Oxygen O
+Sodium Na
+Aluminium Al
+Phosphorus P
+Sulfur S
+Chlorine Cl
+Calcium Ca
+Iron Fe
+Copper Cu
+Zinc Zn
+Silver Ag
+Gold Au
+Mercury Hg

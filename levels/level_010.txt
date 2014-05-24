@@ -3,11 +3,11 @@ switchlily pos=1,4 id=object_008 controlled=object_012
 stonelily pos=0,-2 id=object_047 
 color pos=5,9 id=object_015 count=6 orientation=horizontal 
 math pos=0,-4 id=object_045 count=5 orientation=horizontal 
-interval pos=4,5 id=object_013 count=4 orientation=vertical 
+roman pos=4,5 id=object_013 count=4 orientation=vertical 
 math pos=0,-1 id=object_043 count=5 orientation=horizontal 
 waterlily pos=11,7 id=object_042 
 stonelily pos=-4,-3 id=object_033 
-roman pos=6,7 id=object_006 count=4 orientation=horizontal 
+interval pos=6,7 id=object_006 count=4 orientation=horizontal 
 math pos=-1,-2 id=object_031 count=5 orientation=horizontal 
 switchlily pos=11,9 id=object_035 controlled=object_018
 switchlily pos=14,9 id=object_026 controlled=object_038

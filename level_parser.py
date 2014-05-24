@@ -1,7 +1,7 @@
 from kivy.uix.widget import Widget
 from main import GameWidget, WaterLily, StoneLily,\
     MathWidget, Frog, JumpLine, Fly, Boat, SwitchLily, IntervalWidget,\
-    ColorWidget, RomanWidget, FormWidget
+    ColorWidget, RomanWidget, FormWidget, ChemistryWidget
 from kivy.metrics import dp
 from os import listdir, getcwd
 
@@ -325,6 +325,38 @@ def build_level(filename, app, root):
                 i.speed = 1
             if "orientation" in form:
                 i.orientation = form["orientation"]
+            else:
+                i.orientation = "horizontal"
+            i.setup(force=True)
+            root.game_scatter.before_jumpline.add_widget(i)
+            root.lily_provider.append(i)
+    if "chemistry" in level:
+        for i in range(len(level["chemistry"])):
+            chemistry = level["chemistry"][i]
+            try:
+                i = [iv for iv in root.store if type(iv) == ChemistryWidget][i]
+            except IndexError:
+                i = ChemistryWidget()
+                root.store.append(i)
+            if "id" in chemistry:
+                i.id = chemistry["id"]
+                if i.id not in root.objects:
+                    root.objects[i.id] = i
+            if "pos" in chemistry:
+                x, y = calculate_point(
+                    chemistry["pos"].split(","), distance)
+                i.center_x = x
+                i.y = y
+            if "count" in chemistry:
+                i.count = int(chemistry["count"])
+            else:
+                i.count = 5
+            if "speed" in chemistry:
+                i.speed = float(chemistry["speed"])
+            else:
+                i.speed = 1
+            if "orientation" in chemistry:
+                i.orientation = chemistry["orientation"]
             else:
                 i.orientation = "horizontal"
             i.setup(force=True)

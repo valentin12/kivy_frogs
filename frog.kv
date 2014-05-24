@@ -85,16 +85,11 @@
         top: name.y - dp(10)
     Label:
         id: about_me
-        text: "About me: I'm a hobby developer\nand I'm developing for Voca-Word,\na serious games website, together\nwith Peter Koppatz.\nOur projects can be found on\nvocaword.org"
+        text: "About me: I'm a hobby developer\nand I'm developing for Voca-Word,\na serious games website, together\nwith Peter Koppatz.\nOur projects can be found on\nvocaword.org\n\nYou made a great level\nand want to share it?\nYou have feedback for me?\nSend it to opolo@vocaword.org!"
         halign: "center"
         center_x: root.center_x
+        height: dp(180)
         top: vowo_icon.y - dp(10)
-    Label:
-        id: info
-        halign: "center"
-        center_x: root.center_x
-        top: about_me.y
-        text: "You made a great level\nand want to share it?\nYou have feedback for me?\nSend it to opolo@vocaword.org!"
 
 
 <HelpPopup>
@@ -393,7 +388,7 @@
 <IntervalWidget>
     exercise: "Which interval is it? Play"
     label_width: dp(300)
-    
+
 
 <GameWidget>
     app: app

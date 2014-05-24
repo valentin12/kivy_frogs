@@ -153,16 +153,11 @@ class LevelEditorWidget(Widget):
                 self.level.add_widget(l)
         # the exercises
         exs = []
-        if "math" in level:
-            exs.append("math")
-        if "interval" in level:
-            exs.append("interval")
-        if "color" in level:
-            exs.append("color")
-        if "roman" in level:
-            exs.append("roman")
-        if "form" in level:
-            exs.append("form")
+        types = ["math", "interval", "color", "roman",
+                 "form", "chemistry"]
+        for t in types:
+            if t in level:
+                exs.append(t)
         for ex in exs:
             for e in level[ex]:
                 # exercise widget

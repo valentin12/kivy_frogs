@@ -33,6 +33,8 @@ from random import randint
 from random import random
 from random import choice
 from random import shuffle
+from locale import getdefaultlocale
+import os.path
 
 import level_parser
 from level_editor import LevelEditorWidget
@@ -810,6 +812,12 @@ class ExerciseWidget(Widget):
                     if not frog.anim_running:
                         frog.center = lily.center
 
+    def on_pos(self, *args):
+        self.setup()
+
+    def setup(self):
+        pass
+
     def reset(self):
         pass
 
@@ -817,9 +825,6 @@ class ExerciseWidget(Widget):
 class MathWidget(ExerciseWidget):
     number_range = ListProperty((-10, 10))
     type = StringProperty("add")
-
-    def on_pos(self, instance, pos):
-        self.setup()
 
     def setup(self, force=False):
         if self.initialized and not force:
@@ -937,9 +942,6 @@ class IntervalWidget(ExerciseWidget):
         if self.label.collide_point(*touch.pos):
             self.play_sound()
 
-    def on_pos(self, instance, pos):
-        self.setup()
-
     def setup(self, force=False):
         if self.initialized and not force:
             for i in range(len(self.lilys)):
@@ -1013,9 +1015,6 @@ class ColorWidget(ExerciseWidget):
 
     def __init__(self, **kwargs):
         super(ColorWidget, self).__init__(**kwargs)
-
-    def on_pos(self, instance, pos):
-        self.setup()
 
     def setup(self, force=False):
         if self.initialized and not force:
@@ -1091,9 +1090,6 @@ class RomanWidget(ExerciseWidget):
             n -= ints[i] * count
         return result
 
-    def on_pos(self, instance, pos):
-        self.setup()
-
     def setup(self, force=False):
         if self.initialized and not force:
             for i in range(len(self.lilys)):
@@ -1146,9 +1142,6 @@ class FormWidget(ExerciseWidget):
 
     def __init__(self, **kwargs):
         super(FormWidget, self).__init__(**kwargs)
-
-    def on_pos(self, instance, pos):
-        self.setup()
 
     def setup(self, force=False):
         if self.initialized and not force:
@@ -1203,6 +1196,87 @@ class FormWidget(ExerciseWidget):
                     TriangleWidget(rgb=[0, 1, 0],
                                    center=lily.custom.center,
                                    size=(dp(20), dp(20))))
+        shuffle(self.lilys)
+        for i in range(len(self.lilys)):
+            self.lily_widget.add_widget(self.lilys[i])
+            if self.orientation == "horizontal":
+                self.lilys[i].pos = (self.pos[0] + i * self.distance,
+                                     self.pos[1])
+            else:
+                self.lilys[i].pos = (self.pos[0] + dp(15),
+                                     self.pos[1] + i * self.distance)
+        Clock.unschedule(self.move)
+        Clock.schedule_interval(self.move, 1 / 30)
+
+
+class ChemistryWidget(ExerciseWidget):
+    elements = {"Sauerstoff": "O",
+                "Kohlenstoff": "C",
+                "Stickstoff": "N",
+                "Schwefel": "S",
+                "Gold": "Au",
+                "Kupfer": "Cu"}
+
+    def __init__(self, **kwargs):
+        super(ChemistryWidget, self).__init__(**kwargs)
+        self.elements = {}
+        l = getdefaultlocale()[0]
+        print l
+        p = "data/chemistry_symbols_{}.txt".format(l[0])
+        try:
+            if os.path.isfile(p):
+                with open(p) as f:
+                    for line in f.read().split("\n"):
+                        if not line:
+                            continue
+                        line = line.strip()
+                        key, value = line.split(" ")
+                        self.elements[key] = value
+        except OSError:
+            pass
+        if not self.elements:
+            with open("data/chemistry_symbols_en.txt") as f:
+                for line in f.read().split("\n"):
+                    if not line:
+                        continue
+                    line = line.strip()
+                    key, value = line.split(" ")
+                    self.elements[key] = value
+                        
+
+    def setup(self, force=False):
+        if self.initialized and not force:
+            for i in range(len(self.lilys)):
+                self.lilys[i].pos = (self.pos[0] + i * self.distance,
+                                     self.pos[1])
+            return
+        else:
+            for lily in self.lilys:
+                self.lily_widget.remove_widget(lily)
+            self.lilys = []
+        self.initialized = True
+        key = choice(self.elements.keys())
+        self.exercise = key
+        self.solution = self.elements[key]
+        # other posibilities
+        psb = self.elements.values()[:]
+        psb.remove(self.solution)
+        self.lilys = [MoveableWaterLily()]
+        self.lilys[0].text = self.solution
+        self.lilys[0].value = self.solution
+        self.lilys[0].solution = self.solution
+        for i in range(self.count - 1):
+            try:
+                n = choice(psb)
+                psb.remove(n)
+                self.lilys.append(
+                    MoveableWaterLily(text=n, value=n,
+                                      solution=self.solution))
+            except IndexError:
+                n = choice(self.elements.calues())
+                self.lilys.append(MoveableWaterLily(
+                    text=n, value=n,
+                    solution=self.solution))
         shuffle(self.lilys)
         for i in range(len(self.lilys)):
             self.lily_widget.add_widget(self.lilys[i])

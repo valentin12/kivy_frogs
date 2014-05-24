@@ -10,7 +10,7 @@ waterlily pos=8,4 id=object_006
 waterlily pos=5,1 id=object_005 
 switchlily pos=3,3 id=object_004 controlled=object_003
 waterlily pos=8,3 id=object_003 
-roman pos=3,2 id=object_001 count=5 orientation=horizontal 
+chemistry pos=3,2 id=object_001 count=5 orientation=horizontal 
 stonelily pos=3,1 id=object_000 
 end pos=1,6 id=end 
 start pos=4,0 id=start 

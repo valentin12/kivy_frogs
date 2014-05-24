@@ -3,7 +3,7 @@ waterlily pos=5,10 id=object_036
 waterlily pos=6,10 id=object_035 
 switchlily pos=3,9 id=object_034 controlled=object_036
 waterlily pos=2,9 id=object_031 
-color pos=1,5 id=object_029 count=4 orientation=vertical 
+chemistry pos=1,5 id=object_029 count=4 orientation=vertical 
 stonelily pos=10,10 id=object_028 
 form pos=7,10 id=object_027 count=3 orientation=horizontal 
 waterlily pos=10,9 id=object_026 
