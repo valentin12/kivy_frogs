@@ -1246,7 +1246,6 @@ class ChemistryWidget(ExerciseWidget):
                     line = line.strip()
                     key, value = line.split(" ")
                     self.elements[key] = value
-                        
 
     def setup(self, force=False):
         if self.initialized and not force:
@@ -1277,7 +1276,7 @@ class ChemistryWidget(ExerciseWidget):
                     MoveableWaterLily(text=n, value=n,
                                       solution=self.solution))
             except IndexError:
-                n = choice(self.elements.calues())
+                n = choice(self.elements.values())
                 self.lilys.append(MoveableWaterLily(
                     text=n, value=n,
                     solution=self.solution))
