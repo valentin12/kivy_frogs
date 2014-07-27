@@ -1,9 +1,8 @@
-from kivy.uix.widget import Widget
-from main import GameWidget, WaterLily, StoneLily,\
-    MathWidget, Frog, JumpLine, Fly, Boat, SwitchLily, IntervalWidget,\
+from main import WaterLily, StoneLily,\
+    MathWidget, Frog, Fly, Boat, SwitchLily, IntervalWidget,\
     ColorWidget, RomanWidget, FormWidget, ChemistryWidget
 from kivy.metrics import dp
-from os import listdir, getcwd
+from os import listdir
 
 
 def find_levels():

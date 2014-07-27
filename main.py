@@ -15,11 +15,9 @@ from kivy.metrics import dp
 from kivy.clock import Clock
 Clock.max_iteration = 20
 from kivy.core.audio import SoundLoader
-from kivy.uix.settings import SettingNumeric,\
+from kivy.uix.settings import \
     SettingItem, SettingSpacer
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.popup import Popup
 from kivy.uix.slider import Slider
 from kivy.uix.button import Button
@@ -869,15 +867,16 @@ class MathWidget(ExerciseWidget):
                 to_format = "{} * {}"
             self.exercise = to_format.format(a, b)
             c = a * b
-            if self.number_range[0] < 0 and self.number_range[1] >= 0:
+            if self.number_range[0] < 0 <= self.number_range[1]:
                 r = list(range(self.number_range[0] * self.number_range[1],
-                               max(abs(number_range[0]), number_range[1])**2))
+                               max(abs(self.number_range[0]),
+                                   self.number_range[1]) ** 2))
             elif self.number_range[0] < 0 and self.number_range[1] < 0:
-                r = list(range(self.number_range[1]**2,
-                               self.number_range[0]**2))
+                r = list(range(self.number_range[1] ** 2,
+                               self.number_range[0] ** 2))
             elif self.number_range[0] >= 0 and self.number_range[1] >= 0:
-                r = list(range(self.number_range[0]**2,
-                               self.number_range[1]**2))
+                r = list(range(self.number_range[0] ** 2,
+                               self.number_range[1] ** 2))
             try:
                 r.remove(c)
             except ValueError as e:

@@ -1,10 +1,7 @@
 from kivy.metrics import dp
 from kivy.uix.widget import Widget
 from kivy.uix.scatter import Scatter
-from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
-from kivy.uix.relativelayout import RelativeLayout
-from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
@@ -23,6 +20,7 @@ Builder.load_file("editor.kv")
 class LevelEditorWidget(Widget):
     def __init__(self, **kwargs):
         super(LevelEditorWidget, self).__init__(**kwargs)
+        self.last_export = ""
         self.export_popup = Popup(title="Export ...",
                                   content=ExportPopup(),
                                   size_hint=(.3, .3))
@@ -75,8 +73,8 @@ class LevelEditorWidget(Widget):
                 continue
             x = int(round(c.center_x / dp(100), 0))
             y = int(round(c.y / dp(100), 0))
-            id = c.id
-            s = "{} pos={},{} id={}".format(tp, x, y, id)
+            c_id = c.id
+            s = "{} pos={},{} id={}".format(tp, x, y, c_id)
             out += s + extra_opts + "\n"
         # Add the player frog
         out += "frog id=player jump_img={} sit_img={}"\
@@ -233,8 +231,8 @@ class LevelEditorWidget(Widget):
 
     def next_level_name(self):
         i = 1
-        LOOP = True
-        while LOOP:
+        loop = True
+        while loop:
             if not isfile("levels/custom_level_%03d.txt" % i):
                 return "levels/custom_level_%03d.txt" % i
             i += 1
@@ -247,6 +245,8 @@ class ExportPopup(Widget):
 class LevelScatter(Scatter):
     def __init__(self, **kwargs):
         super(LevelScatter, self).__init__(**kwargs)
+        self.start = None
+        self.end = None
         self.build_standard()
 
     def on_transform_with_touch(self, touch):
@@ -371,8 +371,8 @@ class PHScatter(Scatter):
             center_x = dp(100) * x
             y = dp(100) * y
             # Loop until a free place was found
-            LOOP = True
-            while LOOP:
+            loop = True
+            while loop:
                 for child in self.parent.children:
                     if child.center_x == center_x and\
                        y == child.y and child != self:
@@ -380,7 +380,7 @@ class PHScatter(Scatter):
                         center_x = dp(100) * x
                         break
                 else:
-                    LOOP = False
+                    loop = False
             self.center_x = center_x
             self.y = y
             self.app.editor.select.center = self.to_window(
@@ -437,7 +437,7 @@ class ExercisePH(PHScatter):
             self.real_points = [
                 0 + dp(30),
                 self.height / 2,
-                self.count * (self.distance) + dp(30),
+                self.count * self.distance + dp(30),
                 self.height / 2]
         else:
             self.real_points = [
@@ -493,15 +493,15 @@ class BasePH(PHScatter):
             y = y if y > -1 else 0
             center = (dp(100) * x, dp(100) * y + dp(50))
             # Loop until a free place was found
-            LOOP = True
-            while LOOP:
+            loop = True
+            while loop:
                 for child in self.parent.children:
                     if child.center == center and child != self:
                         x += 1
                         center = (dp(100) * x, dp(100) * y)
                         break
                 else:
-                    LOOP = False
+                    loop = False
             self.center = center
             self.app.editor.select.center = self.to_window(
                 *self.center)
