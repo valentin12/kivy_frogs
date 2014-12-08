@@ -37,6 +37,8 @@ Technical information
 ---------------------
 The game is designed to run on all sizes of devices, but you need a new Android version and much memory to get a good performance on Android. (Download: https://play.google.com/store/apps/details?id=org.vocaword.frogs).
 
+The game is now able to run with Python 2 and Python 3.
+
 More information
 ----------------
 More information will follow soon on http://vocaword.org

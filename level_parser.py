@@ -366,8 +366,8 @@ def build_level(filename, app, root):
             lily = level["switchlily"][i]
             if "controlled" in lily:
                 try:
-                    cont = dict(root.objects.items() +
-                                root.standard_objects.items()
+                    cont = dict(list(root.objects.items()) +
+                                list(root.standard_objects.items())
                                 )[lily["controlled"]]
                     try:
                         l = [li for li in root.store
@@ -432,15 +432,15 @@ def build_level(filename, app, root):
                 if f.id not in root.objects:
                     root.objects[f.id] = f
             if "place" in frog:
-                f.place = dict(root.objects.items() +
-                               root.standard_objects.items())[frog["place"]]
+                f.place = dict(list(root.objects.items()) +
+                               list(root.standard_objects.items()))[frog["place"]]
                 f.place.free = False
                 f.center_x = f.place.center_x
                 f.center_y = f.place.center_y
             else:
-                print "--------------------------------"
-                print "WARNING: Frog has no place given"
-                print "--------------------------------"
+                print("--------------------------------")
+                print("WARNING: Frog has no place given")
+                print("--------------------------------")
             if "player" in frog:
                 f.player = frog["player"] == "True"
                 if f.player:

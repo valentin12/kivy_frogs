@@ -34,26 +34,6 @@ from random import shuffle
 import locale
 import os.path
 
-import level_parser
-from level_editor import LevelEditorWidget
-
-
-def only_running():
-    """Check if a username exists"""
-    def on_decorator(func):
-        def on_call(*args):
-            try:
-                if args[0].app.game.running:
-                    return func(*args)
-                else:
-                    def not_running():
-                        return None
-                    return not_running()
-            except AttributeError:
-                return func(*args)
-        return on_call
-    return on_decorator
-
 
 class FrogApp(App):
     def __init__(self, **kwargs):
@@ -278,8 +258,9 @@ class FrogApp(App):
 
 class GameWidget(Widget):
 
-    @only_running()
     def decrement_lives(self):
+        if not self.app.game.running:
+            return
         self.lives -= 1
         self.live_imgs[self.lives].source = self.live_imgs[
             self.lives].lost_img
@@ -291,8 +272,9 @@ class GameWidget(Widget):
         else:
             self.app.sounds["died"].play()
 
-    @only_running()
     def level_won(self):
+        if not self.app.game.running:
+            return
         self.running = False
         self.app.game.status.text = "Won"
         self.app.sounds["won"].play()
@@ -399,8 +381,9 @@ class WaterLily(Widget):
         self.appear_anim.bind(
             on_complete=lambda a, b: self.on_appeared())
 
-    @only_running()
     def on_free_changed(self, instance, value):
+        if not self.app.game.running:
+            return
         if not value and not self.static and not self.sinking:
             # wait 4 sec until sinking starts
             Clock.unschedule(self.start_sinking)
@@ -413,15 +396,17 @@ class WaterLily(Widget):
         Animation.cancel_all(self.scatter)
         self.appear_anim.start(self.scatter)
 
-    @only_running()
     def start_sinking(self, dt):
+        if not self.app.game.running:
+            return
         if not self.free and not self.static:
             if not self.sinking and not self.appearing:
                 self.sinking = True
                 self.sinking_anim.start(self.scatter)
 
-    @only_running()
     def force_sinking(self):
+        if not self.app.game.running:
+            return
         if not self.sinking:
             Animation.cancel_all(self.scatter)
             self.appearing = False
@@ -547,22 +532,25 @@ class SwitchLily(WaterLily):
 class JumpLine(Widget):
     raw_end = (0, 0)
 
-    @only_running()
     def set(self, point1, point2):
         """Set start and end point of the Line"""
+        if not self.app.game.running:
+            return
         self.start(point1)
         self.end(point2)
 
-    @only_running()
     def start(self, point):
         """Set the start point"""
+        if not self.app.game.running:
+            return
         self.x1 = point[0]
         self.y1 = point[1]
         self.cut_to_max()
 
-    @only_running()
     def end(self, point):
         """Set the end point"""
+        if not self.app.game.running:
+            return
         self.x2 = point[0]
         self.y2 = point[1]
         self.raw_end = (self.x2, self.y2)
@@ -606,11 +594,11 @@ class Frog(Widget):
         self.revive_duration = .5
         self.stay_dead = 3
 
-    @only_running()
     def on_touch_down(self, touch):
         if self.collide_point(*touch.pos) and self.alive:
             touch.ud["start_pos"] = self.center
             touch.ud["frog"] = self
+            touch.ud["ignore"] = True
             if self.jumpline:
                 self.app.game.game_scatter.jumplines.remove_widget(
                     self.jumpline)
@@ -624,8 +612,9 @@ class Frog(Widget):
             return True
         return super(Frog, self).on_touch_down(touch)
 
-    @only_running()
     def on_touch_move(self, touch):
+        if not self.app.game.running:
+            return
         if "start_pos" in touch.ud\
            and "frog" in touch.ud\
            and "jumpline" in touch.ud\
@@ -641,8 +630,9 @@ class Frog(Widget):
             self.touched = False
         return super(Frog, self).on_touch_move(touch)
 
-    @only_running()
     def on_touch_up(self, touch):
+        if not self.app.game.running:
+            return
         if "start_pos" in touch.ud\
            and "frog" in touch.ud\
            and "jumpline" in touch.ud\
@@ -715,8 +705,9 @@ class Frog(Widget):
                     self.go_die(end)
         return super(Frog, self).on_touch_down(touch)
 
-    @only_running()
     def go_die(self, point):
+        if not self.app.game.running:
+            return
         anim = Animation(center_x=point[0],
                          center_y=point[1],
                          duration=self.jump_duration)
@@ -736,8 +727,9 @@ class Frog(Widget):
             self.die_anim.duration +
             self.stay_dead)
 
-    @only_running()
     def kill(self):
+        if not self.app.game.running:
+            return
         if self.jumpline:
             self.app.game.game_scatter.jumplines.remove_widget(
                 self.jumpline)
@@ -748,8 +740,9 @@ class Frog(Widget):
         self.anim_running = True
         self.die_anim.start(self.scatter)
 
-    @only_running()
     def revive(self):
+        if not self.app.game.running:
+            return
         scale_anim = Animation(scale=1,
                                duration=self.revive_duration)
         anim = Animation(center_x=self.place.center_x,
@@ -764,9 +757,10 @@ class Frog(Widget):
         if not self.place.static:
             self.place.stop_sinking()
 
-    @only_running()
     def rotate_to(self, point):
         """Rotate frog to the given point"""
+        if not self.app.game.running:
+            return
         dx = point[0] - self.center_x
         dy = point[1] - self.center_y
         angle = atan2(dy, dx)
@@ -880,9 +874,9 @@ class MathWidget(ExerciseWidget):
             try:
                 r.remove(c)
             except ValueError as e:
-                print e
-                print self.number_range
-                print c
+                print(e)
+                print(self.number_range)
+                print(c)
         else:
             if b == 0:
                 b += 1
@@ -1224,7 +1218,6 @@ class ChemistryWidget(ExerciseWidget):
             locale.setlocale(locale.LC_ALL, '')
             l = locale.getlocale()[0]
         l = l if l else "en_GB"
-        print l
         p = "data/chemistry_symbols_{}.txt".format(l[:2].lower())
         try:
             if os.path.isfile(p):
@@ -1294,6 +1287,7 @@ class ChemistryWidget(ExerciseWidget):
 
 class GameScatter(Scatter):
     def on_transform_with_touch(self, touch):
+        print(touch.ud)
         if self.y > 0 or self.height * self.scale < self.app.window.height:
             self.y = 0
         elif self.top < self.app.window.height:
@@ -1436,19 +1430,19 @@ class OverviewWidget(Widget):
                         continue
                 except AttributeError:
                     pass
-                if type(o) == WaterLily:
+                if str(type(o)).endswith("WaterLily'>"):
                     Color(.1, .6, .1)
                     Ellipse(pos=pos,
                             size=size)
-                elif type(o) == MoveableWaterLily:
+                elif str(type(o)).endswith("MoveableWaterLily'>"):
                     Color(0, 1, 0)
                     Ellipse(pos=pos,
                             size=size)
-                elif type(o) == StoneLily:
+                elif str(type(o)).endswith("StoneLily'>"):
                     Color(.6, .6, .6)
                     Ellipse(pos=pos,
                             size=size)
-                elif type(o) == SwitchLily:
+                elif str(type(o)).endswith("SwitchLily'>"):
                     Color(.1, .3, .1)
                     Ellipse(pos=pos,
                             size=size)
@@ -1456,7 +1450,7 @@ class OverviewWidget(Widget):
                     Ellipse(pos=(pos[0] + o.width / 10. - dp(2),
                                  pos[1] + o.height / 10. - dp(2)),
                             size=(dp(4), dp(4)))
-                elif type(o) == Frog:
+                elif str(type(o)).endswith("Frog'>"):
                     if o.player:
                         Color(1, .5, 0)
                     else:
@@ -1465,6 +1459,8 @@ class OverviewWidget(Widget):
                                  pos[1] + o.height / 20),
                             size=(size[0], size[1] / 2))
 
+import level_parser
+from level_editor import LevelEditorWidget
 
 if __name__ == '__main__':
     FrogApp().run()
